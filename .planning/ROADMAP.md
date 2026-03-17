@@ -62,7 +62,13 @@ Plans:
   2. `the-lab/SKILL.md` contains the JSONL batch prompt schema, 6-dimension classification system, and S/A/B/C tier definitions — no Python code present
   3. `references/x_algorithm_signals.md` lists all 19 signal weights including the author diversity decay formula and Phoenix architecture notes
   4. `decision.md` and `strateji.md` are current: every key decision from Phases 1-3 is logged with date and rationale
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — the-miner/SKILL.md: Hedef Hesap Profili section (bookmark/like > 0.3, dinamik keşif) + prompt-only marker — MLSKILL-01, MLSKILL-03
+- [ ] 03-02-PLAN.md — the-lab/SKILL.md: prompt-only marker (JSONL/6-dim/S-tier already present) — MLSKILL-02, MLSKILL-03
+- [ ] 03-03-PLAN.md — tweet_datasets.md: twikit 2.3.3 section + tweepy deprecation; strateji.md: 6.3 Mirror storage decision closed — REFS-02, REFS-04
+- [ ] 03-04-PLAN.md — decision.md: Phase 1 + Phase 2 decision blocks backfilled — REFS-03
 
 ## Progress
 
@@ -73,4 +79,4 @@ Phases execute in numeric order: 1 → 2 → 3
 |-------|----------------|--------|-----------|
 | 1. Mirror Foundation | 4/4 | Complete    | 2026-03-17 |
 | 2. Mirror + Creator Integration | 3/3 | Complete    | 2026-03-17 |
-| 3. Miner, Lab + References | 0/? | Not started | - |
+| 3. Miner, Lab + References | 0/4 | Not started | - |
