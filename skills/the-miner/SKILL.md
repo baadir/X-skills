@@ -285,9 +285,43 @@ kaggle datasets list --search "twitter algorithm" --sort-by votes --page-size 10
 
 ---
 
+## Hedef Hesap Profili (Dinamik Keşif)
+
+The Miner sabit bir hesap listesiyle çalışmaz. Hesapları sorgu tabanlı olarak dinamik keşfeder.
+
+### Hedef Kriter
+
+| Kriter | Eşik | Rationale |
+|--------|------|-----------|
+| Takipçi sayısı | < 100.000 | Büyük hesaplar niş değil, viral kitle yapısı |
+| Bookmark / Like oranı | > 0.3 | "Kaydedilesi" içerik üretenler; format kalitesinin proxy'si |
+| Engagement rate | Niş ortalamasının üstü | Mutlak sayı değil, hesap büyüklüğüne göre normalize |
+
+**Referans örnek:** @ciftcibahadir — bookmark/like oranı 0.57 (Mart 2026 ölçümü). Bu eşiği geçen hesaplar benzer format kullanıcısıdır.
+
+**Not:** En az 10 tweet veri noktası yokken bookmark/like oranı yanıltıcıdır — küçük örnekte göz ardı et.
+
+### Dinamik Keşif Sorguları
+
+```
+# Niş arama + engagement filtresi
+(agentic AI OR multi-agent OR MCP OR "vibe coding") lang:en -is:retweet min_faves:200
+
+# Sonuçlardan hesap keşfi: bookmark/like > 0.3 oranı filtresi
+# Koşul: author_followers < 100000 AND bookmarks/likes > 0.3
+
+# LangChain / pratik AI
+(langchain OR langgraph) ("built" OR "demo" OR "tutorial") lang:en -is:retweet min_faves:150
+
+# Türkçe niş
+(yapay zeka OR "AI agent" OR LLM) lang:tr -is:retweet min_faves:50
+```
+
+---
+
 ## Hedef Hesaplar (Niş Referansları)
 
-Bu hesapların tweet'leri öncelikli olarak toplanır. Viral içerik örnekleri için temel referans noktaları.
+**Not:** Bu liste sabit bir hedef değildir. Dinamik keşfin kalibrasyon kalitesini doğrulamak için kullanılan referans örneklerdir. Yukarıdaki "Hedef Hesap Profili (Dinamik Keşif)" kriterleriyle keşfedilen yeni hesaplar bu listeyi zamanla genişletir.
 
 ### Tier 1 — Global AI Evangelists (En Yüksek Öncelik)
 
