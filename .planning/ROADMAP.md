@@ -46,7 +46,12 @@ Plans:
   3. Running Creator Mod 1 (Brainstorm) with the DNA report produces at least one content proposal that includes a term from `signature_expressions` and a CTA
   4. Running Creator Mod 3 (Analysis) on a provided tweet produces a structured critique with algorithm-signal rationale
   5. When `style_memory.json` contains fewer than 20 tweets, every Creator output is flagged with a data-confidence warning ("tahmini" / "insufficient data")
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Wave 0 test stubs + fixtures (9 RED tests for MSKILL-01–04 + CRTR-01–05) — MSKILL-01, MSKILL-02, MSKILL-03, MSKILL-04, CRTR-01, CRTR-02, CRTR-03, CRTR-04, CRTR-05
+- [ ] 02-02-PLAN.md — Mirror SKILL.md: schema reconciliation + staleness check + data-sufficiency gate + DNA report schema — MSKILL-01, MSKILL-02, MSKILL-03, MSKILL-04
+- [ ] 02-03-PLAN.md — Creator SKILL.md: DNA report input protocol + Mod 3 algorithm signal + checklist hardening — CRTR-01, CRTR-02, CRTR-03, CRTR-04, CRTR-05
 
 ### Phase 3: Miner, Lab + References
 **Goal**: All prompt-only skill documents (Miner and Lab) are complete and internally consistent, algorithm reference files are current and comprehensive, and the decision and strategy documents reflect all architectural choices made to date
@@ -67,5 +72,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Mirror Foundation | 4/4 | Complete    | 2026-03-17 |
-| 2. Mirror + Creator Integration | 0/? | Not started | - |
+| 2. Mirror + Creator Integration | 0/3 | Not started | - |
 | 3. Miner, Lab + References | 0/? | Not started | - |
