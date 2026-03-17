@@ -44,7 +44,7 @@
 
 ### Miner & Lab SKILL (MLSKILL)
 
-- [ ] **MLSKILL-01**: `the-miner/SKILL.md` niş hesap listesini, veri toplama formatını ve priority score formülünü içeriyor
+- [x] **MLSKILL-01**: `the-miner/SKILL.md` niş hesap listesini, veri toplama formatını ve priority score formülünü içeriyor
 - [x] **MLSKILL-02**: `the-lab/SKILL.md` batch etiketleme prompt şemasını (JSONL), 6 boyutlu sınıflandırmayı ve S/A/B/C tier sistemini içeriyor
 - [x] **MLSKILL-03**: Miner ve Lab SKILL.md dosyaları prompt-only (kod yok), kapalı devre olarak işaretlenmiş
 
@@ -126,7 +126,7 @@
 | CRTR-03 | Phase 2 | Complete |
 | CRTR-04 | Phase 2 | Complete |
 | CRTR-05 | Phase 2 | Complete |
-| MLSKILL-01 | Phase 3 | Pending |
+| MLSKILL-01 | Phase 3 | Complete |
 | MLSKILL-02 | Phase 3 | Complete |
 | MLSKILL-03 | Phase 3 | Complete |
 | REFS-01 | Phase 3 | Pending |
