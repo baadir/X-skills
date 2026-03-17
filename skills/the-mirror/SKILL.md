@@ -857,3 +857,84 @@ Bu şema mirror_sync.py'nin DEFAULT_STYLE_MEMORY sabiti ve run_sync() fonksiyonu
 - `hook_patterns` → `tweet_archive` üzerindeki her `hook_type` değeri için ortalama `engagement_rate` hesapla
 - `tone_profile` → `tweet_archive` üzerindeki her `tone` değeri için ortalama `engagement_rate` hesapla
 - `signature_expressions` → `high_performers` listesindeki tweetlerin `text` alanlarından 3+ tweette geçen terimleri bul. `signature_expressions` alanını OKU değil — daima boştur.
+
+---
+
+## Aktivasyon Protokolü
+
+Mirror skill her başlatıldığında aşağıdaki adımları sırayla uygular. Hiçbir adım atlanamaz.
+
+### Adım 1 — Staleness Kontrolü (MSKILL-02)
+
+style_memory.json içindeki `last_synced_at` değerini oku.
+- `last_synced_at` null ise: Kullanıcıya "style_memory.json henüz oluşturulmamış" mesajı ver ve şu komutu çalıştırmasını iste:
+  ```
+  python skills/the-mirror/mirror_sync.py
+  ```
+  Analizi DUR — devam etme.
+
+- `last_synced_at` doluysa: Bugünün tarihi ile karşılaştır.
+  - Eğer (bugün - last_synced_at) > 7 gün ise: Şu uyarıyı ver ve ardından analizi sürdür:
+    ```
+    SYNC UYARISI: style_memory.json son {N} gün önce güncellendi ({last_synced_at}).
+    Daha doğru bir DNA raporu için önce mirror_sync.py çalıştırın:
+      python skills/the-mirror/mirror_sync.py
+    DNA raporu mevcut veriyle üretilmeye devam ediliyor...
+    ```
+  - Eğer <= 7 gün ise: Uyarı yok, devam et.
+
+### Adım 2 — Veri Yeterliliği Kontrolü (MSKILL-04)
+
+`len(tweet_archive)` sayısını hesapla:
+- Eğer tweet sayısı < 20 ise: TAHMINİ moduna gir (bkz. "Veri Yeterliliği Kontrolü" bölümü).
+- Eğer tweet sayısı >= 20 ise: HIGH güvenilirlik modunda devam et.
+
+### Adım 3 — Veri Agregasyonu
+
+tweet_archive üzerinde şunları hesapla:
+- Her `hook_type` için ortalama `engagement_rate` (hook_patterns)
+- Her `tone` için ortalama `engagement_rate` (tone_profile)
+- `high_performers` tweetlerinin `text` alanlarından imza ifadeleri çıkar (signature_expressions)
+
+### Adım 4 — DNA Raporu Üret
+
+"DNA Raporu Çıktı Şeması" bölümündeki formata göre `dna_report.json` içeriğini üret ve JSON kod bloğu olarak sun.
+
+### Adım 5 — Kullanıcıya Aktar
+
+DNA raporunu The Creator'a iletmek için bir JSON kod bloğu olarak çıktıla. Kullanıcı bunu:
+- Doğrudan The Creator konuşmasına yapıştırabilir
+- `skills/the-mirror/dna_report.json` olarak kaydedebilir
+
+---
+
+## Veri Yeterliliği Kontrolü
+
+### TAHMINİ Modu
+
+tweet_archive içindeki tweet sayısı < 20 olduğunda TAHMINİ modu aktifleşir.
+
+**DNA raporunun başına şunu ekle:**
+```json
+{
+  "data_confidence": "TAHMINI",
+  "tweet_count": "{count}",
+  "insufficient_data_warning": "Tweet arşivi {count} tweet içeriyor (<20). Tüm tahminler az veriyle yapılmıştır. Daha güvenilir analiz için mirror_sync.py ile daha fazla tweet çekin."
+}
+```
+
+**Her analiz bölümünün başlığına `[TAHMINİ]` ekle:**
+- `[TAHMINİ] Hook Performansı` — en az 5 örnek gerekir, az örnekle tahminler güvenilir değildir
+- `[TAHMINİ] Ton Profili` — benzer şekilde
+- `[TAHMINİ] İmza İfadeler` — `high_performers` listesi muhtemelen boş veya 1-2 girişli; uydurma yapma
+
+**TAHMINİ modunda imza ifade üretimi:**
+- `high_performers` listesi boşsa: `signature_expressions: []` yaz, açıklama ekle: "Yeterli high_performer verisi yok."
+- 1-3 high_performer varsa: Sadece bunların text alanlarından güvenle söylenebilecek ifadeleri çıkar. [TAHMINİ] ile işaretle.
+
+### HIGH Güvenilirlik Modu
+
+tweet_archive >= 20 tweet içeriyorsa:
+- `data_confidence: "HIGH"` (20-49 tweet için "LOW" kullanılabilir, 50+ için "HIGH")
+- `insufficient_data_warning: null`
+- Tüm bölüm başlıkları normal (prefix yok)
