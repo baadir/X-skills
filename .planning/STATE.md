@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-03-PLAN.md — categorize_tweet migrated to twikit dicts, atomic save, evolution_log, seed data; 9 new tests GREEN (13 total); plan 01-04 is next
-last_updated: "2026-03-17T08:39:34.000Z"
-last_activity: "2026-03-17 — Plan 01-03 complete: categorize/memory pipeline complete"
+status: phase_complete
+stopped_at: Completed 01-04-PLAN.md — async run_sync wired, dry-run guard, evolution_log call, terminal report; live --dry-run against @ciftcibahadir approved (no Error 226, view_count > 0); Phase 1 complete
+last_updated: "2026-03-17T09:15:00.000Z"
+last_activity: "2026-03-17 — Plan 01-04 complete: async orchestration + CLI wiring; Phase 1 Mirror Foundation done"
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
-  percent: 75
+  completed_plans: 4
+  percent: 100
 ---
 
 # Project State
@@ -25,29 +25,29 @@ See: .planning/PROJECT.md (updated 2026-03-17)
 
 ## Current Position
 
-Phase: 1 of 3 (Mirror Foundation)
-Plan: 3 of 4 in current phase
-Status: Executing
-Last activity: 2026-03-17 — Plan 01-03 complete: categorize/memory pipeline complete, 9 new tests GREEN
+Phase: 1 of 3 (Mirror Foundation) — COMPLETE
+Plan: 4 of 4 in Phase 1 (all done)
+Status: Phase complete — ready for Phase 2
+Last activity: 2026-03-17 — Plan 01-04 complete: async orchestration, dry-run guard, CLI wiring; live validation approved
 
-Progress: [███████░░░] 75%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 4.3 min
-- Total execution time: 0.22 hours
+- Total plans completed: 4
+- Average duration: ~11 min (including human checkpoint)
+- Total execution time: ~0.73 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-mirror-foundation | 3 | 13 min | 4.3 min |
+| 01-mirror-foundation | 4 | ~43 min | ~11 min |
 
 **Recent Trend:**
-- Last 5 plans: 3min, 6min, 4min
-- Trend: stable
+- Last 5 plans: 3min, 6min, 4min, ~30min (with human checkpoint)
+- Trend: stable (checkpoint plans include human validation time)
 
 *Updated after each plan completion*
 
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 01-03]: Atomic write uses same-dir temp file (dir=target_dir) — ensures os.replace stays same-drive on Windows, making it a fast rename not a cross-device copy
 - [Phase 01-03]: CIFTCIBAHADIR_SEED is a separate constant — enables testing seed values independently of DEFAULT_STYLE_MEMORY
 - [Phase 01-03]: compute_engagement_rate denominator changed from impression_count to view_count — twikit breaking change from tweepy, documented with inline comment
+- [Phase 01-04]: asyncio.run(main()) over get_event_loop().run_until_complete() — Python 3.10+ on Windows uses ProactorEventLoop by default; asyncio.run() handles lifecycle correctly
+- [Phase 01-04]: evolution_log called only when not dry_run AND new_tweets non-empty — avoids empty log entries on zero-result syncs
+- [Phase 01-04]: Cutoff precedence: --since flag > last_synced_at > None (first run) — lets user override without editing style_memory.json
 
 ### Pending Todos
 
@@ -77,11 +80,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 1]: twikit cookie-based auth has LOW confidence reliability against X bot detection — validate with a low-volume test run before committing to full migration; fallback is twscrape 0.17.0
-- [Phase 1]: Atomic write pattern on Windows 11 — VERIFIED as working (tempfile.mkstemp same-dir + os.replace, test_crash_safety passes)
+- [Phase 1 - RESOLVED]: twikit cookie-based auth — VALIDATED: live --dry-run against @ciftcibahadir passed, no Error 226, view_count > 0. Low-volume risk mitigated for now; fallback to twscrape 0.17.0 still available if X tightens restrictions
+- [Phase 1 - RESOLVED]: Atomic write pattern on Windows 11 — VERIFIED as working (tempfile.mkstemp same-dir + os.replace, test_crash_safety passes)
 
 ## Session Continuity
 
-Last session: 2026-03-17T08:39:34.000Z
-Stopped at: Completed 01-03-PLAN.md — categorize_tweet migrated to twikit dicts, atomic save, evolution_log, seed data; 9 new tests GREEN (13 total); plan 01-04 is next
+Last session: 2026-03-17T09:15:00.000Z
+Stopped at: Completed 01-04-PLAN.md — Phase 1 Mirror Foundation complete. All 4 plans done, 13 tests passing, live validation approved.
 Resume file: None

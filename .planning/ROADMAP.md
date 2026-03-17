@@ -12,7 +12,7 @@ Three phases deliver the V1 agent ecosystem. Phase 1 repairs the only existing c
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Mirror Foundation** - Migrate mirror_sync.py to twikit, harden style_memory.json, add .gitignore
+- [x] **Phase 1: Mirror Foundation** - Migrate mirror_sync.py to twikit, harden style_memory.json, add .gitignore (completed 2026-03-17)
 - [ ] **Phase 2: Mirror + Creator Integration** - Finalise Mirror SKILL.md, build DNA report pipeline, activate Creator Mod 1 + Mod 3
 - [ ] **Phase 3: Miner, Lab + References** - Complete Miner and Lab SKILL.md documents, populate algorithm references and decision log
 
@@ -34,7 +34,7 @@ Plans:
 - [x] 01-01-PLAN.md — Test scaffold (Wave 0 stubs) + .gitignore — REFS-05
 - [x] 01-02-PLAN.md — Async fetch layer rewrite (twikit auth, incremental pagination, rate limiting) — SYNC-01, SYNC-02, SYNC-03, SYNC-07
 - [x] 01-03-PLAN.md — Memory management layer (atomic write, evolution_log, rolling window, seed data, categorization adaptation) — SYNC-04, SYNC-05, SYNC-06, MEM-01–MEM-05
-- [ ] 01-04-PLAN.md — Async orchestration wiring + CLI + live validation checkpoint — SYNC-08, SYNC-09
+- [x] 01-04-PLAN.md — Async orchestration wiring + CLI + live validation checkpoint — SYNC-08, SYNC-09
 
 ### Phase 2: Mirror + Creator Integration
 **Goal**: The Mirror AI prompt produces a structured DNA report from `style_memory.json` and the Creator skill uses that report to generate voice-authentic content proposals via Mod 1 (Brainstorm) and Mod 3 (Analysis), with guards against LLM hallucination on sparse data
@@ -66,6 +66,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Mirror Foundation | 3/4 | In Progress|  |
+| 1. Mirror Foundation | 4/4 | Complete   | 2026-03-17 |
 | 2. Mirror + Creator Integration | 0/? | Not started | - |
 | 3. Miner, Lab + References | 0/? | Not started | - |

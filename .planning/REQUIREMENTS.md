@@ -16,8 +16,8 @@
 - [x] **SYNC-05**: `style_memory.json` atomic write ile kaydediliyor (crash'te veri kaybı yok)
 - [x] **SYNC-06**: Tweet arşivi 1000 tweet ile sınırlı, rolling window ile eski kayıtlar temizleniyor
 - [x] **SYNC-07**: Rate limit koruması: 429 hatası için exponential backoff, günlük max fetch limiti
-- [ ] **SYNC-08**: `--dry-run` modu çalışıyor, `--since YYYY-MM-DD` override destekleniyor
-- [ ] **SYNC-09**: Sync çalıştıktan sonra terminal'e özet rapor basıyor: kaç tweet çekildi, yeni high_performer var mı
+- [x] **SYNC-08**: `--dry-run` modu çalışıyor, `--since YYYY-MM-DD` override destekleniyor
+- [x] **SYNC-09**: Sync çalıştıktan sonra terminal'e özet rapor basıyor: kaç tweet çekildi, yeni high_performer var mı
 
 ### Style Memory (MEM)
 
@@ -106,17 +106,17 @@
 | SYNC-01 | Phase 1 | Complete |
 | SYNC-02 | Phase 1 | Complete |
 | SYNC-03 | Phase 1 | Complete |
-| SYNC-04 | Phase 1 | Pending |
-| SYNC-05 | Phase 1 | Pending |
-| SYNC-06 | Phase 1 | Pending |
+| SYNC-04 | Phase 1 | Complete |
+| SYNC-05 | Phase 1 | Complete |
+| SYNC-06 | Phase 1 | Complete |
 | SYNC-07 | Phase 1 | Complete |
-| SYNC-08 | Phase 1 | Pending |
-| SYNC-09 | Phase 1 | Pending |
-| MEM-01 | Phase 1 | Pending |
-| MEM-02 | Phase 1 | Pending |
-| MEM-03 | Phase 1 | Pending |
-| MEM-04 | Phase 1 | Pending |
-| MEM-05 | Phase 1 | Pending |
+| SYNC-08 | Phase 1 | Complete |
+| SYNC-09 | Phase 1 | Complete |
+| MEM-01 | Phase 1 | Complete |
+| MEM-02 | Phase 1 | Complete |
+| MEM-03 | Phase 1 | Complete |
+| MEM-04 | Phase 1 | Complete |
+| MEM-05 | Phase 1 | Complete |
 | MSKILL-01 | Phase 2 | Pending |
 | MSKILL-02 | Phase 2 | Pending |
 | MSKILL-03 | Phase 2 | Pending |
@@ -142,4 +142,4 @@
 
 ---
 *Requirements defined: 2026-03-17*
-*Last updated: 2026-03-17 after initial definition*
+*Last updated: 2026-03-17 after Phase 1 completion (01-04)*
