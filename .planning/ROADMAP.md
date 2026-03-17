@@ -28,7 +28,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. A second sync run fetches only tweets newer than `last_synced_at` — no full re-fetch
   4. `style_memory.json` contains `high_performers`, `hook_patterns`, `tone_profile`, `performance_snapshot`, and `evolution_log` fields populated with real data
   5. `cookies.json` and `.env` do not appear in `git status` (`.gitignore` blocks them)
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Test scaffold (Wave 0 stubs) + .gitignore — REFS-05
+- [ ] 01-02-PLAN.md — Async fetch layer rewrite (twikit auth, incremental pagination, rate limiting) — SYNC-01, SYNC-02, SYNC-03, SYNC-07
+- [ ] 01-03-PLAN.md — Memory management layer (atomic write, evolution_log, rolling window, seed data, categorization adaptation) — SYNC-04, SYNC-05, SYNC-06, MEM-01–MEM-05
+- [ ] 01-04-PLAN.md — Async orchestration wiring + CLI + live validation checkpoint — SYNC-08, SYNC-09
 
 ### Phase 2: Mirror + Creator Integration
 **Goal**: The Mirror AI prompt produces a structured DNA report from `style_memory.json` and the Creator skill uses that report to generate voice-authentic content proposals via Mod 1 (Brainstorm) and Mod 3 (Analysis), with guards against LLM hallucination on sparse data
@@ -60,6 +66,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Mirror Foundation | 0/? | Not started | - |
+| 1. Mirror Foundation | 0/4 | Planned | - |
 | 2. Mirror + Creator Integration | 0/? | Not started | - |
 | 3. Miner, Lab + References | 0/? | Not started | - |
