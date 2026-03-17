@@ -54,7 +54,7 @@
 - [ ] **REFS-02**: `references/tweet_datasets.md` ücretsiz dataset kaynakları ve kullanılabilir kütüphaneleri listeler
 - [ ] **REFS-03**: `decision.md` tüm mimari kararları tarihiyle birlikte kayıt altında tutuyor
 - [ ] **REFS-04**: `strateji.md` hibrit mimariyi, iş modelini ve açık noktaları tanımlıyor
-- [ ] **REFS-05**: `.gitignore` Miner/Lab kodlarını (gelecekteki) ve cookies.json'u dışarıda tutuyor
+- [x] **REFS-05**: `.gitignore` Miner/Lab kodlarını (gelecekteki) ve cookies.json'u dışarıda tutuyor
 
 ---
 
@@ -133,7 +133,7 @@
 | REFS-02 | Phase 3 | Pending |
 | REFS-03 | Phase 3 | Pending |
 | REFS-04 | Phase 3 | Pending |
-| REFS-05 | Phase 1 | Pending |
+| REFS-05 | Phase 1 | Complete |
 
 **Coverage:**
 - v1 requirements: 31 total
