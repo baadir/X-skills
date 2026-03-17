@@ -1,0 +1,16 @@
+# Credentials — never commit
+.env
+cookies.json
+
+# Local data — stays on user's machine
+style_memory.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyw
+
+# Test artifacts
+.pytest_cache/
+*.json.tmp
