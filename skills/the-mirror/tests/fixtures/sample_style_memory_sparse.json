@@ -1,0 +1,91 @@
+{
+  "userId": "ciftcibahadir",
+  "handle": "@ciftcibahadir",
+  "last_synced_at": "2026-02-01T10:00:00+00:00",
+  "last_sync_count": 5,
+  "version": 1,
+  "tweet_archive": [
+    {
+      "id": "2001",
+      "text": "İlk tweetime baktım, utandım. Ama bu yolculuk güzeldi.",
+      "created_at": "2026-01-28T09:00:00+00:00",
+      "hook_type": "hikaye",
+      "tone": "samimi",
+      "format": "tek_tweet",
+      "has_media": false,
+      "is_reply": false,
+      "metrics": {"view_count": 800, "like_count": 22, "reply_count": 5, "retweet_count": 3, "bookmark_count": 9, "quote_count": 1},
+      "engagement_rate": 0.0500
+    },
+    {
+      "id": "2002",
+      "text": "Yapay zeka 2026'da ne işe yarayacak?",
+      "created_at": "2026-01-27T10:00:00+00:00",
+      "hook_type": "soru",
+      "tone": "egitici",
+      "format": "tek_tweet",
+      "has_media": false,
+      "is_reply": false,
+      "metrics": {"view_count": 600, "like_count": 15, "reply_count": 4, "retweet_count": 2, "bookmark_count": 6, "quote_count": 0},
+      "engagement_rate": 0.0450
+    },
+    {
+      "id": "2003",
+      "text": "Bugün 3 saatte 3 makale yazdım. Prompt mühendisliği fark yaratıyor.",
+      "created_at": "2026-01-26T11:00:00+00:00",
+      "hook_type": "rakam_ile_bas",
+      "tone": "heyecanli",
+      "format": "tek_tweet",
+      "has_media": false,
+      "is_reply": false,
+      "metrics": {"view_count": 750, "like_count": 19, "reply_count": 6, "retweet_count": 4, "bookmark_count": 11, "quote_count": 1},
+      "engagement_rate": 0.0547
+    },
+    {
+      "id": "2004",
+      "text": "Herkes ChatGPT kullanıyor, kimse nasıl kullanacağını bilmiyor.",
+      "created_at": "2026-01-25T09:30:00+00:00",
+      "hook_type": "provokasyon",
+      "tone": "alaycı",
+      "format": "tek_tweet",
+      "has_media": false,
+      "is_reply": false,
+      "metrics": {"view_count": 1100, "like_count": 35, "reply_count": 12, "retweet_count": 8, "bookmark_count": 18, "quote_count": 3},
+      "engagement_rate": 0.0691
+    },
+    {
+      "id": "2005",
+      "text": "Tek hedefim: her gün biraz daha iyi olmak.",
+      "created_at": "2026-01-24T08:00:00+00:00",
+      "hook_type": "diger",
+      "tone": "samimi",
+      "format": "tek_tweet",
+      "has_media": false,
+      "is_reply": false,
+      "metrics": {"view_count": 500, "like_count": 12, "reply_count": 3, "retweet_count": 1, "bookmark_count": 5, "quote_count": 0},
+      "engagement_rate": 0.0420
+    }
+  ],
+  "high_performers": [],
+  "performance_snapshot": {
+    "total_impressions": 3750,
+    "total_engagements": 195,
+    "avg_engagement_rate": 0.0522,
+    "verified_follower_ratio": null,
+    "top_signal_breakdown": {
+      "likes": 103,
+      "replies": 30,
+      "retweets": 18,
+      "bookmarks": 49,
+      "shares": 0,
+      "quote_tweets": 5
+    },
+    "bookmark_to_like_ratio": 0.4757,
+    "retweet_to_like_ratio": 0.1748,
+    "reply_to_impression_ratio": 0.0080
+  },
+  "hook_patterns": {},
+  "tone_profile": {},
+  "signature_expressions": {},
+  "evolution_log": []
+}
