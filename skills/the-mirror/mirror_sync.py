@@ -693,18 +693,22 @@ def append_evolution_log(style_memory: dict, trigger: str, summary: str) -> None
 # Ana sync akışı
 # ---------------------------------------------------------------------------
 
-def run_sync(dry_run: bool = False, since: str | None = None) -> None:
+async def run_sync(dry_run: bool = False, since: str | None = None) -> None:
     """
     Ana sync fonksiyonu. Tüm adımları sırasıyla çalıştırır:
       1. Config yükle
       2. style_memory oku
-      3. API'dan yeni tweetleri çek
-      4. Kategorize et
-      5. Arşive ekle
-      6. Yüksek performanslıları belirle
-      7. Snapshot'ı güncelle
-      8. Dosyayı kaydet (dry-run değilse)
-      9. Raporu terminale yaz
+      3. Cutoff belirle
+      4. Auth client al
+      5. Tweetleri çek
+      6. Kategorize et
+      7. Arşive ekle (deduplicate)
+      8. Rolling window uygula
+      9. Yüksek performanslıları belirle
+      10. Snapshot'ı güncelle
+      11. evolution_log ekle (dry-run değilse ve yeni tweet varsa)
+      12. Dosyayı kaydet (dry-run değilse)
+      13. Raporu terminale yaz
     """
     logger.info("=" * 60)
     logger.info("The Mirror — Auto-Sync Başlatılıyor")
@@ -726,7 +730,7 @@ def run_sync(dry_run: bool = False, since: str | None = None) -> None:
     if not style_memory.get("handle"):
         style_memory["handle"] = f"@{username.lstrip('@')}"
 
-    # Başlangıç zamanını belirle
+    # Adım 3: Cutoff belirle
     if since:
         # --since parametresi öncelikli
         try:
@@ -749,17 +753,16 @@ def run_sync(dry_run: bool = False, since: str | None = None) -> None:
         cutoff = None
         logger.info("İlk sync — cutoff yok, ilk 200 tweet çekilecek.")
 
-    # Adım 3: twikit client al ve tweetleri çek
-    async def _fetch():
-        auth_client = await get_authenticated_client(
-            cookies_file=str(COOKIES_FILE),
-            username=config["USERNAME"],
-            email=config["EMAIL"],
-            password=config["PASSWORD"],
-        )
-        return await fetch_tweets_since(auth_client, user_id, cutoff)
+    # Adım 4: Auth client al
+    auth_client = await get_authenticated_client(
+        cookies_file=str(COOKIES_FILE),
+        username=config["USERNAME"],
+        email=config["EMAIL"],
+        password=config["PASSWORD"],
+    )
 
-    raw_tweets = asyncio.run(_fetch())
+    # Adım 5: Tweetleri çek
+    raw_tweets = await fetch_tweets_since(auth_client, user_id, cutoff)
 
     if not raw_tweets:
         logger.info("Yeni tweet bulunamadı. Sync tamamlandı.")
@@ -773,13 +776,14 @@ def run_sync(dry_run: bool = False, since: str | None = None) -> None:
         )
         return
 
-    # Adım 4: Her tweeti kategorize et
+    # Adım 6: Her tweeti kategorize et
     logger.info("%d yeni tweet kategorize ediliyor...", len(raw_tweets))
     categorized_tweets = [categorize_tweet(t) for t in raw_tweets]
 
-    # Adım 5: Arşive ekle (tekrar eklememek için id kontrolü yap)
+    # Adım 7: Arşive ekle (tekrar eklememek için id kontrolü yap)
     tweet_archive = style_memory.setdefault("tweet_archive", [])
     existing_ids = {t["id"] for t in tweet_archive}
+    prev_hp_count = len(style_memory.get("high_performers", []))
 
     new_tweets = [t for t in categorized_tweets if t["id"] not in existing_ids]
     logger.info(
@@ -793,7 +797,7 @@ def run_sync(dry_run: bool = False, since: str | None = None) -> None:
     # Arşivi created_at'e göre azalan sırayla (en yeni önce) düzenle
     tweet_archive.sort(key=lambda t: t.get("created_at", ""), reverse=True)
 
-    # Rolling window: arşiv 1000 tweet'i aşarsa en eski olanları at
+    # Adım 8: Rolling window: arşiv 1000 tweet'i aşarsa en eski olanları at
     MAX_ARCHIVE_SIZE = 1000
     if len(tweet_archive) > MAX_ARCHIVE_SIZE:
         tweet_archive = tweet_archive[:MAX_ARCHIVE_SIZE]
@@ -802,26 +806,37 @@ def run_sync(dry_run: bool = False, since: str | None = None) -> None:
             "Tweet arşivi %d'e kırpıldı (rolling window).", MAX_ARCHIVE_SIZE
         )
 
-    # Adım 6: Yüksek performanslıları belirle (tüm arşiv üzerinde)
+    # Adım 9: Yüksek performanslıları belirle (tüm arşiv üzerinde)
     high_performers = identify_high_performers(tweet_archive)
+    new_high_performers = [hp for hp in high_performers
+                           if hp["id"] not in {t["id"] for t in style_memory.get("high_performers", [])}]
     style_memory["high_performers"] = high_performers
     logger.info("%d yüksek performanslı tweet tespit edildi.", len(high_performers))
 
-    # Adım 7: Performance snapshot güncelle
+    # Adım 10: Performance snapshot güncelle
     update_performance_snapshot(style_memory, tweet_archive)
 
     # last_synced_at ve last_sync_count güncelle
     style_memory["last_synced_at"] = datetime.now(timezone.utc).isoformat()
     style_memory["last_sync_count"] = len(new_tweets)
 
-    # Adım 8: Kaydet (dry-run değilse)
+    # Adım 11: evolution_log ekle (dry-run değilse ve yeni tweet varsa)
+    if not dry_run and new_tweets:
+        hp_delta = len(new_high_performers) - prev_hp_count
+        append_evolution_log(
+            style_memory,
+            trigger="sync" if not since else "--since override",
+            summary=f"Added {len(new_tweets)} tweets. High_performers delta: {hp_delta:+d}.",
+        )
+
+    # Adım 12: Kaydet (dry-run değilse)
     if not dry_run:
         save_style_memory(style_memory)
         logger.info("style_memory.json güncellendi.")
     else:
         logger.info("[DRY-RUN] style_memory.json DEĞİŞTİRİLMEDİ.")
 
-    # Adım 9: Raporu terminale yaz
+    # Adım 13: Raporu terminale yaz
     avg_engagement = compute_avg_engagement_rate(tweet_archive)
     _print_sync_report(
         username=username,
@@ -928,7 +943,7 @@ def main() -> None:
         logger.debug("DEBUG modu etkin.")
 
     try:
-        run_sync(dry_run=args.dry_run, since=args.since)
+        asyncio.run(run_sync(dry_run=args.dry_run, since=args.since))
     except KeyboardInterrupt:
         logger.info("Kullanıcı tarafından iptal edildi.")
         sys.exit(0)

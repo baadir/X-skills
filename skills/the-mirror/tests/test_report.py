@@ -1,17 +1,36 @@
 """
-test_report.py — Report output stub tests (SYNC-09).
+test_report.py — Report output tests (SYNC-09).
 
-These tests are RED stubs. They will be implemented in Wave 1
-when the _print_sync_report function is rewritten.
+Tests that _print_sync_report outputs username, new_count, total_archive,
+and high_performer_count to stdout.
 """
+from __future__ import annotations
+
 import pytest
 
 
-def test_summary_output():
+def test_summary_output(capsys):
     """SYNC-09: _print_sync_report outputs username, new_count, total_archive, high_performer_count.
 
-    Will test that _print_sync_report (captured via capsys or StringIO)
-    prints output containing the username, the number of newly synced tweets,
-    the total archive size, and the high performer count.
+    Calls _print_sync_report directly and captures stdout via capsys.
+    Confirms output contains the username, newly synced tweet count,
+    total archive size, and high performer count.
     """
-    pytest.fail("NOT IMPLEMENTED — Wave 1 task will implement this")
+    import mirror_sync as ms
+
+    ms._print_sync_report(
+        username="ciftcibahadir",
+        new_count=5,
+        total_archive=48,
+        high_performer_count=3,
+        avg_engagement=0.023,
+        dry_run=False,
+    )
+
+    captured = capsys.readouterr()
+    output = captured.out
+
+    assert "ciftcibahadir" in output, "Username missing from report output"
+    assert "5" in output, "new_count (5) missing from report output"
+    assert "48" in output, "total_archive (48) missing from report output"
+    assert "3" in output, "high_performer_count (3) missing from report output"
