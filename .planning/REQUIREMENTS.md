@@ -51,9 +51,9 @@
 ### References & Docs (REFS)
 
 - [ ] **REFS-01**: `references/x_algorithm_signals.md` X algoritmasının sinyal ağırlıklarını, author diversity cezasını ve Phoenix mimarisini içeriyor
-- [ ] **REFS-02**: `references/tweet_datasets.md` ücretsiz dataset kaynakları ve kullanılabilir kütüphaneleri listeler
-- [ ] **REFS-03**: `decision.md` tüm mimari kararları tarihiyle birlikte kayıt altında tutuyor
-- [ ] **REFS-04**: `strateji.md` hibrit mimariyi, iş modelini ve açık noktaları tanımlıyor
+- [x] **REFS-02**: `references/tweet_datasets.md` ücretsiz dataset kaynakları ve kullanılabilir kütüphaneleri listeler
+- [x] **REFS-03**: `decision.md` tüm mimari kararları tarihiyle birlikte kayıt altında tutuyor
+- [x] **REFS-04**: `strateji.md` hibrit mimariyi, iş modelini ve açık noktaları tanımlıyor
 - [x] **REFS-05**: `.gitignore` Miner/Lab kodlarını (gelecekteki) ve cookies.json'u dışarıda tutuyor
 
 ---
@@ -130,9 +130,9 @@
 | MLSKILL-02 | Phase 3 | Complete |
 | MLSKILL-03 | Phase 3 | Complete |
 | REFS-01 | Phase 3 | Pending |
-| REFS-02 | Phase 3 | Pending |
-| REFS-03 | Phase 3 | Pending |
-| REFS-04 | Phase 3 | Pending |
+| REFS-02 | Phase 3 | Complete |
+| REFS-03 | Phase 3 | Complete |
+| REFS-04 | Phase 3 | Complete |
 | REFS-05 | Phase 1 | Complete |
 
 **Coverage:**
