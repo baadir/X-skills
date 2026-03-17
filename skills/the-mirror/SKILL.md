@@ -938,3 +938,172 @@ tweet_archive >= 20 tweet içeriyorsa:
 - `data_confidence: "HIGH"` (20-49 tweet için "LOW" kullanılabilir, 50+ için "HIGH")
 - `insufficient_data_warning: null`
 - Tüm bölüm başlıkları normal (prefix yok)
+
+---
+
+## DNA Raporu Çıktı Şeması
+
+> Bu bölüm, lines 481-614'teki eski "Çıktı: DNA Raporu" bölümünün yerini almaktadır.
+> Enum değerleri mirror_sync.py ile uyumlu hale getirilmiştir.
+> Mirror AI bu bölümdeki şemayı kullanmalıdır.
+
+DNA raporu üretilirken `sync_status` ve `data_confidence` alanları her zaman doldurulur.
+Hook ve ton enum değerleri mirror_sync.py'deki gerçek değerlerdir.
+
+```json
+{
+  "report_id": "mirror-{handle}-{yyyymmdd}",
+  "generated_at": "ISO-8601 timestamp",
+  "user_handle": "@string",
+  "style_memory_version": "integer",
+  "report_type": "enum: full_dna | quick_summary | trend_filtered",
+
+  "sync_status": {
+    "last_synced_at": "ISO-8601 veya null",
+    "days_since_sync": "integer veya null",
+    "is_stale": "boolean — true eğer days_since_sync > 7",
+    "stale_warning": "string veya null — uyarı metni eğer stale ise"
+  },
+
+  "data_confidence": "enum: HIGH | LOW | TAHMINI",
+  "tweet_count": "integer — len(tweet_archive)",
+  "insufficient_data_warning": "string veya null — tweet_count < 20 ise dolu",
+
+  "identity_summary": {
+    "one_line_voice": "string",
+    "core_niches": ["string"],
+    "audience_type": "string",
+    "creator_archetype": "string"
+  },
+
+  "performance_context": {
+    "current_avg_engagement_rate": "float — performance_snapshot.avg_engagement_rate'den",
+    "benchmark_comparison": "string",
+    "strongest_content_signal": "string",
+    "growth_bottleneck": "string",
+    "quick_win_opportunity": "string"
+  },
+
+  "voice_dna": {
+    "signature_terms": ["string — high_performers text alanlarından hesaplanmış, 10-15 terim"],
+    "avoid_terms": ["string"],
+    "sentence_rhythm": "string",
+    "punctuation_style": "string",
+    "opening_formula": "string",
+    "closing_formula": "string",
+    "sample_authentic_sentences": ["string — gerçek high_performer tweetlerden 3-5 cümle"]
+  },
+
+  "hook_arsenal": {
+    "best_hook_type": "string — tweet_archive'de en yüksek ort. engagement_rate'e sahip hook_type",
+    "hook_type_performance": {
+      "soru": "float — tweet_archive'de hook_type=soru olan tweetlerin ort. engagement_rate",
+      "provokasyon": "float",
+      "rakam_ile_bas": "float",
+      "karsi_gorus": "float",
+      "hikaye": "float",
+      "liste_vaadi": "float",
+      "cesur_iddia": "float",
+      "diger": "float"
+    },
+    "top_performing_hooks": [
+      {
+        "hook_text": "string — tweeti ilk cümlesi",
+        "hook_type": "string",
+        "engagement_rate": "float",
+        "reusable_pattern": "string"
+      }
+    ],
+    "hook_templates_for_creator": ["string — The Creator için hazır kanca şablonları"]
+  },
+
+  "tone_profile": {
+    "dominant_tone": "string — tweet_archive'de en çok kullanılan tone değeri",
+    "highest_performing_tone": "string — en yüksek ort. engagement_rate'e sahip tone",
+    "tone_performance": {
+      "alaycı": "float — tweet_archive'de tone=alaycı olan tweetlerin ort. engagement_rate",
+      "heyecanli": "float",
+      "egitici": "float",
+      "samimi": "float",
+      "profesyonel": "float"
+    }
+  },
+
+  "format_playbook": {
+    "go_to_format": "string",
+    "bookmark_format": "string",
+    "viral_format": "string",
+    "reply_magnet_format": "string",
+    "formats_to_avoid": ["string"],
+    "format_recommendations": [
+      {
+        "format": "string",
+        "use_case": "string",
+        "expected_primary_signal": "string"
+      }
+    ]
+  },
+
+  "cta_guidance": {
+    "current_cta_deficit": "boolean — retweet_to_like_ratio < 0.02 ise true",
+    "retweet_rate_problem": "boolean",
+    "recommended_ctas": [
+      {
+        "cta_text": "string",
+        "best_placement": "string",
+        "target_signal": "string"
+      }
+    ],
+    "cta_frequency_guide": "string"
+  },
+
+  "weak_points_briefing": {
+    "critical_weaknesses": [
+      {
+        "issue": "string",
+        "diagnosis": "string",
+        "fix_for_creator": "string"
+      }
+    ]
+  },
+
+  "creator_instructions": {
+    "must_do": ["string"],
+    "must_avoid": ["string"],
+    "tone_calibration": "string",
+    "authenticity_check": "string"
+  }
+}
+```
+
+### Hesaplama Rehberi
+
+**hook_type_performance hesaplama:**
+```
+tweet_archive içindeki her tweet için:
+  hook_type_buckets[tweet.hook_type].append(tweet.engagement_rate)
+
+sonuç:
+  hook_type_performance.soru = mean(hook_type_buckets["soru"])  (boşsa 0.0)
+  hook_type_performance.provokasyon = mean(hook_type_buckets["provokasyon"])
+  ... (tüm 8 enum değeri için)
+```
+
+**tone_performance hesaplama:**
+```
+tweet_archive içindeki her tweet için:
+  tone_buckets[tweet.tone].append(tweet.engagement_rate)
+
+sonuç:
+  tone_performance.alaycı = mean(tone_buckets["alaycı"])  (boşsa 0.0)
+  ... (tüm 5 enum değeri için)
+```
+
+**signature_terms hesaplama:**
+```
+high_performers listesindeki her tweet için:
+  text alanındaki kelimeleri tokenize et
+  3 veya daha fazla high_performer tweetinde geçen terimleri bul
+  Her terimin bu tweetlerdeki ort. engagement_rate'ini not et
+  En yüksek engagement_rate'e sahip 10-15 terimi seç
+```
