@@ -9,13 +9,13 @@
 
 ### Mirror Sync (SYNC)
 
-- [ ] **SYNC-01**: `mirror_sync.py` tweepy'den twikit 2.3.3'e migrate edilmiş, cookie tabanlı auth ile çalışıyor
-- [ ] **SYNC-02**: Script kendi hesabının tweetlerini çekiyor: text, created_at, view_count, like_count, reply_count, retweet_count, bookmark_count
-- [ ] **SYNC-03**: `start_time = last_synced_at` kullanarak incremental sync yapıyor (sadece yeni tweetleri çekiyor)
+- [x] **SYNC-01**: `mirror_sync.py` tweepy'den twikit 2.3.3'e migrate edilmiş, cookie tabanlı auth ile çalışıyor
+- [x] **SYNC-02**: Script kendi hesabının tweetlerini çekiyor: text, created_at, view_count, like_count, reply_count, retweet_count, bookmark_count
+- [x] **SYNC-03**: `start_time = last_synced_at` kullanarak incremental sync yapıyor (sadece yeni tweetleri çekiyor)
 - [ ] **SYNC-04**: Her tweet için hook_type, tone, format, is_reply, has_media otomatik kategorize ediliyor
 - [ ] **SYNC-05**: `style_memory.json` atomic write ile kaydediliyor (crash'te veri kaybı yok)
 - [ ] **SYNC-06**: Tweet arşivi 1000 tweet ile sınırlı, rolling window ile eski kayıtlar temizleniyor
-- [ ] **SYNC-07**: Rate limit koruması: 429 hatası için exponential backoff, günlük max fetch limiti
+- [x] **SYNC-07**: Rate limit koruması: 429 hatası için exponential backoff, günlük max fetch limiti
 - [ ] **SYNC-08**: `--dry-run` modu çalışıyor, `--since YYYY-MM-DD` override destekleniyor
 - [ ] **SYNC-09**: Sync çalıştıktan sonra terminal'e özet rapor basıyor: kaç tweet çekildi, yeni high_performer var mı
 
@@ -103,13 +103,13 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SYNC-01 | Phase 1 | Pending |
-| SYNC-02 | Phase 1 | Pending |
-| SYNC-03 | Phase 1 | Pending |
+| SYNC-01 | Phase 1 | Complete |
+| SYNC-02 | Phase 1 | Complete |
+| SYNC-03 | Phase 1 | Complete |
 | SYNC-04 | Phase 1 | Pending |
 | SYNC-05 | Phase 1 | Pending |
 | SYNC-06 | Phase 1 | Pending |
-| SYNC-07 | Phase 1 | Pending |
+| SYNC-07 | Phase 1 | Complete |
 | SYNC-08 | Phase 1 | Pending |
 | SYNC-09 | Phase 1 | Pending |
 | MEM-01 | Phase 1 | Pending |
