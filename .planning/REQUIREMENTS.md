@@ -12,20 +12,20 @@
 - [x] **SYNC-01**: `mirror_sync.py` tweepy'den twikit 2.3.3'e migrate edilmiş, cookie tabanlı auth ile çalışıyor
 - [x] **SYNC-02**: Script kendi hesabının tweetlerini çekiyor: text, created_at, view_count, like_count, reply_count, retweet_count, bookmark_count
 - [x] **SYNC-03**: `start_time = last_synced_at` kullanarak incremental sync yapıyor (sadece yeni tweetleri çekiyor)
-- [ ] **SYNC-04**: Her tweet için hook_type, tone, format, is_reply, has_media otomatik kategorize ediliyor
-- [ ] **SYNC-05**: `style_memory.json` atomic write ile kaydediliyor (crash'te veri kaybı yok)
-- [ ] **SYNC-06**: Tweet arşivi 1000 tweet ile sınırlı, rolling window ile eski kayıtlar temizleniyor
+- [x] **SYNC-04**: Her tweet için hook_type, tone, format, is_reply, has_media otomatik kategorize ediliyor
+- [x] **SYNC-05**: `style_memory.json` atomic write ile kaydediliyor (crash'te veri kaybı yok)
+- [x] **SYNC-06**: Tweet arşivi 1000 tweet ile sınırlı, rolling window ile eski kayıtlar temizleniyor
 - [x] **SYNC-07**: Rate limit koruması: 429 hatası için exponential backoff, günlük max fetch limiti
 - [ ] **SYNC-08**: `--dry-run` modu çalışıyor, `--since YYYY-MM-DD` override destekleniyor
 - [ ] **SYNC-09**: Sync çalıştıktan sonra terminal'e özet rapor basıyor: kaç tweet çekildi, yeni high_performer var mı
 
 ### Style Memory (MEM)
 
-- [ ] **MEM-01**: `style_memory.json` şeması: performance_snapshot, hook_patterns, tone_profile, signature_expressions, high_performers, last_synced_at, version
-- [ ] **MEM-02**: `high_performers` listesi otomatik güncelleniyor: engagement rate > ortalamanın 1.5 katı olan tweetler
-- [ ] **MEM-03**: `performance_snapshot` her sync'te güncelleniyor: avg_engagement_rate, bookmark_to_like_ratio, retweet_to_like_ratio
-- [ ] **MEM-04**: `@ciftcibahadir` için başlangıç değerleri elle girilmiş (254.8K impressions, 5.9K eng, 48 verified vb.)
-- [ ] **MEM-05**: `evolution_log` her güncellemede kayıt tutuyor: tarih, trigger, değişiklik özeti, version
+- [x] **MEM-01**: `style_memory.json` şeması: performance_snapshot, hook_patterns, tone_profile, signature_expressions, high_performers, last_synced_at, version
+- [x] **MEM-02**: `high_performers` listesi otomatik güncelleniyor: engagement rate > ortalamanın 1.5 katı olan tweetler
+- [x] **MEM-03**: `performance_snapshot` her sync'te güncelleniyor: avg_engagement_rate, bookmark_to_like_ratio, retweet_to_like_ratio
+- [x] **MEM-04**: `@ciftcibahadir` için başlangıç değerleri elle girilmiş (254.8K impressions, 5.9K eng, 48 verified vb.)
+- [x] **MEM-05**: `evolution_log` her güncellemede kayıt tutuyor: tarih, trigger, değişiklik özeti, version
 
 ### Mirror SKILL (MSKILL)
 

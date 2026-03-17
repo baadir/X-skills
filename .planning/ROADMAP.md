@@ -31,9 +31,9 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Test scaffold (Wave 0 stubs) + .gitignore — REFS-05
-- [ ] 01-02-PLAN.md — Async fetch layer rewrite (twikit auth, incremental pagination, rate limiting) — SYNC-01, SYNC-02, SYNC-03, SYNC-07
-- [ ] 01-03-PLAN.md — Memory management layer (atomic write, evolution_log, rolling window, seed data, categorization adaptation) — SYNC-04, SYNC-05, SYNC-06, MEM-01–MEM-05
+- [x] 01-01-PLAN.md — Test scaffold (Wave 0 stubs) + .gitignore — REFS-05
+- [x] 01-02-PLAN.md — Async fetch layer rewrite (twikit auth, incremental pagination, rate limiting) — SYNC-01, SYNC-02, SYNC-03, SYNC-07
+- [x] 01-03-PLAN.md — Memory management layer (atomic write, evolution_log, rolling window, seed data, categorization adaptation) — SYNC-04, SYNC-05, SYNC-06, MEM-01–MEM-05
 - [ ] 01-04-PLAN.md — Async orchestration wiring + CLI + live validation checkpoint — SYNC-08, SYNC-09
 
 ### Phase 2: Mirror + Creator Integration
@@ -66,6 +66,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Mirror Foundation | 2/4 | In Progress|  |
+| 1. Mirror Foundation | 3/4 | In Progress|  |
 | 2. Mirror + Creator Integration | 0/? | Not started | - |
 | 3. Miner, Lab + References | 0/? | Not started | - |
