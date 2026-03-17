@@ -29,18 +29,18 @@
 
 ### Mirror SKILL (MSKILL)
 
-- [ ] **MSKILL-01**: `the-mirror/SKILL.md` `style_memory.json` şemasını tam tanımlıyor ve açıklıyor
-- [ ] **MSKILL-02**: Mirror SKILL aktivasyonunda önce `last_synced_at` kontrol edip yeni tweet var mı diye sync uyarısı veriyor
-- [ ] **MSKILL-03**: Mirror SKILL, `style_memory.json`'dan DNA Raporu üretiyor ve The Creator'a iletebiliyor
-- [ ] **MSKILL-04**: Mirror SKILL minimum veri uyarısı yapıyor: <20 tweet için "tahmini" flagleri zorunlu
+- [x] **MSKILL-01**: `the-mirror/SKILL.md` `style_memory.json` şemasını tam tanımlıyor ve açıklıyor
+- [x] **MSKILL-02**: Mirror SKILL aktivasyonunda önce `last_synced_at` kontrol edip yeni tweet var mı diye sync uyarısı veriyor
+- [x] **MSKILL-03**: Mirror SKILL, `style_memory.json`'dan DNA Raporu üretiyor ve The Creator'a iletebiliyor
+- [x] **MSKILL-04**: Mirror SKILL minimum veri uyarısı yapıyor: <20 tweet için "tahmini" flagleri zorunlu
 
 ### Creator SKILL (CRTR)
 
-- [ ] **CRTR-01**: `the-creator/SKILL.md` DNA Raporunu input olarak alıp Mod 1 (Brainstorm) çalıştırabiliyor
-- [ ] **CRTR-02**: `the-creator/SKILL.md` Mod 3 (Analiz) çalıştırabiliyor: verilen tweet veya metriği analiz et
-- [ ] **CRTR-03**: Creator çıktısı `signature_expressions` listesinden en az 1-2 terim kullanıyor
-- [ ] **CRTR-04**: Creator her öneride CTA rehberliği veriyor (RT zayıflığı nedeniyle zorunlu)
-- [ ] **CRTR-05**: Creator "authenticity check" uyguluyor: çıktı "bu kullanıcıdan çıkmış gibi" test ediliyor
+- [x] **CRTR-01**: `the-creator/SKILL.md` DNA Raporunu input olarak alıp Mod 1 (Brainstorm) çalıştırabiliyor
+- [x] **CRTR-02**: `the-creator/SKILL.md` Mod 3 (Analiz) çalıştırabiliyor: verilen tweet veya metriği analiz et
+- [x] **CRTR-03**: Creator çıktısı `signature_expressions` listesinden en az 1-2 terim kullanıyor
+- [x] **CRTR-04**: Creator her öneride CTA rehberliği veriyor (RT zayıflığı nedeniyle zorunlu)
+- [x] **CRTR-05**: Creator "authenticity check" uyguluyor: çıktı "bu kullanıcıdan çıkmış gibi" test ediliyor
 
 ### Miner & Lab SKILL (MLSKILL)
 
@@ -117,15 +117,15 @@
 | MEM-03 | Phase 1 | Complete |
 | MEM-04 | Phase 1 | Complete |
 | MEM-05 | Phase 1 | Complete |
-| MSKILL-01 | Phase 2 | Pending |
-| MSKILL-02 | Phase 2 | Pending |
-| MSKILL-03 | Phase 2 | Pending |
-| MSKILL-04 | Phase 2 | Pending |
-| CRTR-01 | Phase 2 | Pending |
-| CRTR-02 | Phase 2 | Pending |
-| CRTR-03 | Phase 2 | Pending |
-| CRTR-04 | Phase 2 | Pending |
-| CRTR-05 | Phase 2 | Pending |
+| MSKILL-01 | Phase 2 | Complete |
+| MSKILL-02 | Phase 2 | Complete |
+| MSKILL-03 | Phase 2 | Complete |
+| MSKILL-04 | Phase 2 | Complete |
+| CRTR-01 | Phase 2 | Complete |
+| CRTR-02 | Phase 2 | Complete |
+| CRTR-03 | Phase 2 | Complete |
+| CRTR-04 | Phase 2 | Complete |
+| CRTR-05 | Phase 2 | Complete |
 | MLSKILL-01 | Phase 3 | Pending |
 | MLSKILL-02 | Phase 3 | Pending |
 | MLSKILL-03 | Phase 3 | Pending |
