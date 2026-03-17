@@ -122,3 +122,24 @@ mirror_sync.py'nin tweepy'den twikit 2.3.3'e geçişi sırasında alınan yedi i
 - `style_memory.json` atomic write ile crash-safe
 
 ---
+
+## [2026-03-17] — Phase 2: Mirror DNA Raporu ve Creator Entegrasyon Kararları
+
+**Bağlam:**
+Mirror SKILL.md DNA rapor şemasının tasarımı ve Creator SKILL.md entegrasyonu sırasında alınan beş karar. Phase 2 planları 02-01 ile 02-03 arasında uygulandı. Kaynak: 02-03-SUMMARY.md ve STATE.md.
+
+**Kararlar:**
+1. **DNA report şeması:** Beş zorunlu alan — `voice_dna`, `data_confidence`, `hook_arsenal`, `cta_guidance`, `sync_status`. Creator bu alanlara named field reference ile erişir (`voice_dna.signature_terms`, `cta_guidance.recommended_ctas`).
+2. **7-gün staleness eşiği:** `last_synced_at` bugünden 7+ gün eskiyse `sync_status.is_stale: true`. Mirror bu durumda sync uyarısı üretir.
+3. **TAHMINI gate:** `style_memory.json` içinde tweet sayısı < 20 ise `data_confidence: "TAHMINI"`. Her Creator çıktısı veri-güven uyarısıyla işaretlenir.
+4. **Additive-only SKILL.md edit stratejisi:** Yeni bölümler mevcut satırlar değiştirilmeden dosya sonuna eklenir. Yeni bölümler eski bölümleri geçersiz kıldığını açıkça belirtir. Phase 2'de the-mirror SKILL.md (satır 785 sonrası) ve the-creator SKILL.md (satır 740 sonrası) bu pattern ile genişletildi.
+5. **Named field references:** Creator prompt'larında `voice_dna.signature_terms` ve `cta_guidance.recommended_ctas` gibi dot-notation referanslar kullanılır — JSON path belirsizliğini ortadan kaldırır.
+
+**Durum:** Tamamlandı — Phase 2 (02-01 ile 02-03)
+
+**Sonuç:**
+- `skills/the-mirror/SKILL.md` — DNA rapor protokolü, staleness check, TAHMINI gate, Mod 3 bölümleri eklendi
+- `skills/the-creator/SKILL.md` — DNA rapor input protokolü, Mod 3 algoritma sinyal bölümü eklendi
+- 5 Creator yapısal testi GREEN
+
+---
