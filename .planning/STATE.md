@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: completed
-stopped_at: Completed 02-03-PLAN.md — 5 Creator structural tests GREEN, SKILL.md extended with DNA protocol/checklist/Mod3 sections
-last_updated: "2026-03-17T11:39:30.828Z"
+stopped_at: Completed 03-02-PLAN.md — the-lab/SKILL.md marked prompt-only with frontmatter fields and Kapsam Sınırı notice block
+last_updated: "2026-03-17T12:36:11.642Z"
 last_activity: "2026-03-17 — Plan 01-04 complete: async orchestration, dry-run guard, CLI wiring; live validation approved"
 progress:
   total_phases: 3
   completed_phases: 2
-  total_plans: 7
-  completed_plans: 7
+  total_plans: 11
+  completed_plans: 8
   percent: 71
 ---
 
@@ -69,6 +69,7 @@ Progress: [██████████] 100%
 | Phase 02-mirror-creator-integration P01 | 5 | 2 tasks | 5 files |
 | Phase 02-mirror-creator-integration P02 | 3 | 3 tasks | 1 files |
 | Phase 02-mirror-creator-integration P03 | 2 | 2 tasks | 1 files |
+| Phase 03-miner-lab-references P02 | 3 | 1 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -96,6 +97,7 @@ Recent decisions affecting current work:
 - [Phase 02-mirror-creator-integration]: Fixtures use actual mirror_sync.py enum values to guarantee Wave 1 SKILL.md edits target the exact strings tests assert
 - [Phase 02-mirror-creator-integration]: Additive-only SKILL.md edit: new sections appended after line 785, old sections preserved; new sections explicitly supersede old via annotation
 - [Phase 02-mirror-creator-integration]: Additive-only Creator SKILL.md edits: 3 sections appended after line 740, existing content preserved; override sections explicitly supersede old checklist items
+- [Phase 03-miner-lab-references]: IDE linter warnings for status/circuit fields in the-lab/SKILL.md are false positives — linter enforces executable Claude skill schema, but this file is a documentation/prompt file
 
 ### Pending Todos
 
@@ -108,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T11:36:02.210Z
-Stopped at: Completed 02-03-PLAN.md — 5 Creator structural tests GREEN, SKILL.md extended with DNA protocol/checklist/Mod3 sections
+Last session: 2026-03-17T12:36:11.636Z
+Stopped at: Completed 03-02-PLAN.md — the-lab/SKILL.md marked prompt-only with frontmatter fields and Kapsam Sınırı notice block
 Resume file: None
