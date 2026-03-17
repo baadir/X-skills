@@ -21,6 +21,7 @@ import json
 import logging
 import os
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -79,6 +80,23 @@ DEFAULT_STYLE_MEMORY = {
         "retweet_to_like_ratio": None,
         "reply_to_impression_ratio": None,
     },
+    "hook_patterns": {},
+    "tone_profile": {},
+    "signature_expressions": {},
+    "evolution_log": [],
+}
+
+# @ciftcibahadir ilk kez çalışmada kullanılacak seed değerleri
+# MEM-04: Applied ONLY when style_memory.json does not yet exist (first-run)
+CIFTCIBAHADIR_SEED = {
+    "handle": "@ciftcibahadir",
+    "tweet_count_at_seed": 48,
+    "performance_snapshot": {
+        "total_impressions": 254800,
+        "total_engagements": 5900,
+        "avg_engagement_rate": 0.0232,
+        "verified_follower_ratio": 0.35,
+    },
 }
 
 # Module-level twikit client (en-US locale)
@@ -129,14 +147,30 @@ def load_style_memory() -> dict:
     """
     style_memory.json dosyasını yükler.
     Dosya yoksa varsayılan şemayla yeni bir dosya oluşturur.
+    İlk çalışmada (@ciftcibahadir için) seed değerleri uygulanır.
     """
+    import copy
+
     if not STYLE_MEMORY_PATH.exists():
         logger.info(
             "style_memory.json bulunamadı. Yeni dosya oluşturuluyor: %s",
             STYLE_MEMORY_PATH,
         )
-        save_style_memory(DEFAULT_STYLE_MEMORY)
-        return dict(DEFAULT_STYLE_MEMORY)
+        data = copy.deepcopy(DEFAULT_STYLE_MEMORY)
+
+        # MEM-04: Apply @ciftcibahadir seed values on first run
+        # (last_synced_at is None and tweet_archive is empty)
+        if data.get("last_synced_at") is None and not data.get("tweet_archive"):
+            data["handle"] = CIFTCIBAHADIR_SEED["handle"]
+            seed_perf = CIFTCIBAHADIR_SEED["performance_snapshot"]
+            data["performance_snapshot"]["total_impressions"] = seed_perf["total_impressions"]
+            data["performance_snapshot"]["total_engagements"] = seed_perf["total_engagements"]
+            data["performance_snapshot"]["avg_engagement_rate"] = seed_perf["avg_engagement_rate"]
+            data["performance_snapshot"]["verified_follower_ratio"] = seed_perf["verified_follower_ratio"]
+            logger.info("@ciftcibahadir seed değerleri uygulandı.")
+
+        save_style_memory(data)
+        return data
 
     with open(STYLE_MEMORY_PATH, "r", encoding="utf-8") as f:
         data = json.load(f)
@@ -145,10 +179,28 @@ def load_style_memory() -> dict:
 
 
 def save_style_memory(data: dict) -> None:
-    """style_memory.json dosyasına veriyi UTF-8 formatında yazar."""
-    with open(STYLE_MEMORY_PATH, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-    logger.debug("style_memory.json kaydedildi.")
+    """style_memory.json dosyasına veriyi UTF-8 formatında atomik olarak yazar.
+
+    Atomik yazma deseni (Windows uyumlu — same-dir temp + os.replace):
+    Geçici dosya hedef dizinde oluşturulur, böylece os.replace aynı sürücü
+    içinde rename olarak çalışır ve crash-safe olur.
+    """
+    abs_path = os.path.abspath(str(STYLE_MEMORY_PATH))
+    target_dir = os.path.dirname(abs_path)
+    fd, tmp_path = tempfile.mkstemp(dir=target_dir, suffix=".json.tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp_path, abs_path)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+    logger.debug("style_memory.json kaydedildi (atomik).")
 
 
 # ---------------------------------------------------------------------------
@@ -312,6 +364,15 @@ def detect_hook_type(text: str) -> str:
     if any(ind in lower for ind in karsi_indicators):
         return "karsi_gorus"
 
+    # Hikaye kalıpları (liste_vaadi'den önce kontrol edilmeli —
+    # "adım" listesi "yaşadım" gibi fiillerde yanlış eşleşme yapabilir)
+    hikaye_indicators = [
+        "bugün", "geçen", "bir gün", "geçenlerde", "dün", "bu sabah",
+        "anlatayım", "paylaşayım", "story:",
+    ]
+    if any(ind in lower for ind in hikaye_indicators):
+        return "hikaye"
+
     # Liste vaadi kalıpları
     liste_indicators = [
         "liste", "maddeler", "adım", "şunları", "şu ", "bunları",
@@ -319,14 +380,6 @@ def detect_hook_type(text: str) -> str:
     ]
     if any(ind in lower for ind in liste_indicators):
         return "liste_vaadi"
-
-    # Hikaye kalıpları
-    hikaye_indicators = [
-        "bugün", "geçen", "bir gün", "geçenlerde", "dün", "bu sabah",
-        "anlatayım", "paylaşayım", "story:",
-    ]
-    if any(ind in lower for ind in hikaye_indicators):
-        return "hikaye"
 
     # Cesur iddia kalıpları
     cesur_indicators = [
@@ -410,11 +463,13 @@ def detect_format(tweet_data: dict, is_reply: bool) -> str:
 def compute_engagement_rate(metrics: dict) -> float:
     """
     Engagement rate'i hesaplar.
-    Formül: (likes + replies + retweets + bookmarks + quotes) / impressions
+    Formül: (likes + replies + retweets + bookmarks + quotes) / view_count
 
-    impressions 0 ise 0.0 döner.
+    # twikit: view_count replaces impression_count
+    view_count 0 ise 0.0 döner.
     """
-    impressions = metrics.get("impression_count", 0) or 0
+    # twikit: view_count replaces impression_count
+    impressions = metrics.get("view_count", 0) or 0
     if impressions == 0:
         return 0.0
 
@@ -428,9 +483,16 @@ def compute_engagement_rate(metrics: dict) -> float:
     return round(total_engagements / impressions, 6)
 
 
-def categorize_tweet(tweet) -> dict:
+def categorize_tweet(raw: dict) -> dict:
     """
-    Tek bir Tweepy tweet nesnesini alır ve yapılandırılmış bir dict döner.
+    twikit _tweet_to_dict() tarafından üretilen ham dict'i alır ve
+    yapılandırılmış bir dict döner.
+
+    raw dict shape (fetch_tweets_since / _tweet_to_dict çıktısı):
+        id, text, created_at, created_at_datetime,
+        view_count, bookmark_count, favorite_count,
+        retweet_count, reply_count, quote_count,
+        in_reply_to (bool), has_media (bool)
 
     Returns:
         {
@@ -446,23 +508,24 @@ def categorize_tweet(tweet) -> dict:
             "engagement_rate": float,
         }
     """
-    # Tweepy v4 nesneleri attribute erişimi destekler
-    tweet_id = str(tweet.id)
-    text = tweet.text or ""
-    created_at = tweet.created_at.isoformat() if tweet.created_at else None
+    # Dict key access — no tweepy attribute access
+    tweet_id = str(raw["id"])
+    text = raw["text"] or ""
+    created_at = raw["created_at"]  # already an ISO-8601 string from _tweet_to_dict
 
-    # Metrikler (public_metrics)
-    metrics = {}
-    if tweet.public_metrics:
-        metrics = dict(tweet.public_metrics)
+    # Metrikler — twikit field names
+    metrics = {
+        "view_count": raw["view_count"],          # twikit: view_count replaces impression_count
+        "like_count": raw["favorite_count"],
+        "reply_count": raw["reply_count"],
+        "retweet_count": raw["retweet_count"],
+        "bookmark_count": raw["bookmark_count"],
+        "quote_count": raw["quote_count"],
+    }
 
-    # Reply kontrolü
-    is_reply = tweet.in_reply_to_user_id is not None
-
-    # Medya kontrolü: attachments.media_keys varsa medyalı tweet
-    has_media = False
-    if tweet.attachments and tweet.attachments.get("media_keys"):
-        has_media = True
+    # Reply ve medya kontrolü — already booleans from _tweet_to_dict
+    is_reply = raw["in_reply_to"]
+    has_media = raw["has_media"]
 
     # Kategorize
     hook_type = detect_hook_type(text)
@@ -559,7 +622,8 @@ def update_performance_snapshot(style_memory: dict, tweet_archive: list[dict]) -
         retweets = m.get("retweet_count", 0) or 0
         bookmarks = m.get("bookmark_count", 0) or 0
         quotes = m.get("quote_count", 0) or 0
-        impressions = m.get("impression_count", 0) or 0
+        # twikit: view_count replaces impression_count
+        impressions = m.get("view_count", 0) or 0
 
         total_likes += likes
         total_replies += replies
@@ -591,6 +655,37 @@ def update_performance_snapshot(style_memory: dict, tweet_archive: list[dict]) -
     )
     snapshot["reply_to_impression_ratio"] = (
         round(total_replies / total_impressions, 6) if total_impressions > 0 else None
+    )
+
+
+# ---------------------------------------------------------------------------
+# Evolution log — sürüm takibi
+# ---------------------------------------------------------------------------
+
+def append_evolution_log(style_memory: dict, trigger: str, summary: str) -> None:
+    """
+    style_memory'ye bir evolution_log girişi ekler ve version'ı artırır.
+
+    Giriş formatı (RESEARCH.md):
+        {
+            "date": ISO-8601 UTC timestamp,
+            "trigger": str,       # örn: "sync", "--since override", "manual"
+            "change_summary": str, # örn: "Added 12 tweets. 3 new high_performers."
+            "version": int,       # artırılmış sürüm numarası
+        }
+    """
+    style_memory["version"] = style_memory.get("version", 0) + 1
+    entry = {
+        "date": datetime.now(timezone.utc).isoformat(),
+        "trigger": trigger,
+        "change_summary": summary,
+        "version": style_memory["version"],
+    }
+    style_memory.setdefault("evolution_log", []).append(entry)
+    logger.debug(
+        "Evolution log güncellendi. Versiyon: %d, Tetikleyici: %s",
+        style_memory["version"],
+        trigger,
     )
 
 
@@ -697,6 +792,15 @@ def run_sync(dry_run: bool = False, since: str | None = None) -> None:
 
     # Arşivi created_at'e göre azalan sırayla (en yeni önce) düzenle
     tweet_archive.sort(key=lambda t: t.get("created_at", ""), reverse=True)
+
+    # Rolling window: arşiv 1000 tweet'i aşarsa en eski olanları at
+    MAX_ARCHIVE_SIZE = 1000
+    if len(tweet_archive) > MAX_ARCHIVE_SIZE:
+        tweet_archive = tweet_archive[:MAX_ARCHIVE_SIZE]
+        style_memory["tweet_archive"] = tweet_archive
+        logger.info(
+            "Tweet arşivi %d'e kırpıldı (rolling window).", MAX_ARCHIVE_SIZE
+        )
 
     # Adım 6: Yüksek performanslıları belirle (tüm arşiv üzerinde)
     high_performers = identify_high_performers(tweet_archive)
