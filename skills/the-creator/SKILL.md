@@ -788,3 +788,62 @@ Her içerikte CTA ekleme kuralı:
 
 `sync_status.is_stale == true` ise: İçerik önerisinin sonuna şu notu ekle:
 > Not: DNA raporu {days_since_sync} günlük veriyle üretilmiştir. Güncel analiz için mirror_sync.py çalıştırın.
+
+---
+
+## Pre-Flight Checklist Güncellemeleri
+
+> Bu bölüm, "Kalite Kontrol — Pre-Flight Checklist" bölümündeki iki maddeyi günceller.
+> DNA raporu mevcut olduğunda aşağıdaki maddeler uygulanır.
+
+### DNA Testi — Güncellenmiş Madde (CRTR-03)
+
+Eski: "İmza ifadelerden en az biri kullanıldı mı? (Mirror raporuna göre)"
+Yeni:
+- [ ] `voice_dna.signature_terms` listesinden en az 1-2 terim kullanıldı mı?
+  - DNA raporu yoksa: Mirror raporundaki genel imza ifadeleri listesine bak
+  - `signature_terms` boşsa (TAHMINI mod): Bu maddeyi atla, uyarı ekle
+
+### Algoritma Testi — Eklenen Madde (CRTR-04)
+
+Mevcut RT CTA maddesinin ALTINA ekle:
+- [ ] `cta_guidance.recommended_ctas` listesinden bir CTA seçildi mi?
+  - `current_cta_deficit == true` ise bu madde zorunlu, atlanamazır
+  - DNA raporu yoksa: System prompt CTA kurallarından genel CTA kullan
+
+---
+
+## Mod 3 — Güncellenmiş Çıktı Formatı
+
+> Bu bölüm, "Mod 3 — Analiz Modu" çıktı yapısını günceller. (CRTR-02)
+> X Algoritması Sinyal Gerekçesi bölümü zorunludur.
+
+```
+MEVCUT TWEET ANALİZİ
+
+Orijinal:
+[Tweet metni]
+
+Tespit edilen sorunlar:
+- [Sorun 1 — kısa açıklama]
+- [Sorun 2 — kısa açıklama]
+
+X ALGORİTMASI SİNYAL GEREKÇESİ:
+- Zayıf sinyal: [Sinyal adı — örn: Retweet, DM Share] — [Neden zayıf]
+- Eksik sinyal: [Sinyal adı] — [Neden eksik ve nasıl eklenir]
+- Risk: [Sinyal adı] — [Negatif sinyal tetikleme riski varsa]
+- Güçlü sinyal: [Sinyal adı] — [Ne iyi gidiyor, koru]
+
+Mirror DNA Değerlendirmesi:
+- Uyum: [Yüksek / Orta / Düşük]
+- [Hangi Mirror DNA özelliği korunmuş veya çiğnenmiş]
+
+İyileştirilmiş versiyon:
+[Yeni tweet metni]
+
+Ne değişti:
+- [Değişiklik 1: algoritma sinyali gerekçesiyle]
+- [Değişiklik 2: Mirror DNA gerekçesiyle]
+
+Tahmini iyileşme: [Hangi sinyalin güçleneceği]
+```
