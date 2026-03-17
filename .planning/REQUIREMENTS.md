@@ -50,7 +50,7 @@
 
 ### References & Docs (REFS)
 
-- [ ] **REFS-01**: `references/x_algorithm_signals.md` X algoritmasının sinyal ağırlıklarını, author diversity cezasını ve Phoenix mimarisini içeriyor
+- [x] **REFS-01**: `references/x_algorithm_signals.md` X algoritmasının sinyal ağırlıklarını, author diversity cezasını ve Phoenix mimarisini içeriyor
 - [x] **REFS-02**: `references/tweet_datasets.md` ücretsiz dataset kaynakları ve kullanılabilir kütüphaneleri listeler
 - [x] **REFS-03**: `decision.md` tüm mimari kararları tarihiyle birlikte kayıt altında tutuyor
 - [x] **REFS-04**: `strateji.md` hibrit mimariyi, iş modelini ve açık noktaları tanımlıyor
@@ -129,7 +129,7 @@
 | MLSKILL-01 | Phase 3 | Complete |
 | MLSKILL-02 | Phase 3 | Complete |
 | MLSKILL-03 | Phase 3 | Complete |
-| REFS-01 | Phase 3 | Pending |
+| REFS-01 | Phase 3 | Complete |
 | REFS-02 | Phase 3 | Complete |
 | REFS-03 | Phase 3 | Complete |
 | REFS-04 | Phase 3 | Complete |
