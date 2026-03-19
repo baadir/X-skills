@@ -1,13 +1,10 @@
 ---
-name: The Miner
-description: X (Twitter) API v2, arXiv ve Kaggle'dan yüksek etkileşimli tweet verisi, akademik araştırma ve datasetleri toplayarak yapılandırılmış formatta The Lab'a ileten veri madencisi skill'i.
-type: data-collector
-pipeline_position: 1
-feeds_into: The Lab
-target_user: "@ciftcibahadir"
-niche: "Agentic AI, multi-skill agent, vibe coding, MCP, LangChain, pratik AI denemeleri"
-status: prompt-only
-circuit: closed
+name: the-miner
+description: X'ten yüksek etkileşimli tweet verisi toplayarak yapılandırılmış formatta The Lab'a ileten veri madencisi. Pipeline pozisyon 1. Hedef niş — Agentic AI, multi-skill agent, vibe coding, MCP, LangChain.
+metadata:
+  status: prompt-only
+  circuit: closed
+  target_user: "@ciftcibahadir"
 ---
 
 > **Kapsam Sınırı (v1):** Bu skill şu an **prompt-only**'dir — kapalı devre fabrika katmanı.
@@ -663,3 +660,67 @@ KAGGLE_KEY=your_kaggle_key
 - `refine_query` — daha spesifik sorgular için
 - `increase_threshold` — kalite barını yükselt
 - `add_account` — yeni referans hesap ekle
+
+---
+
+## Telegram Bildirimi
+
+Her çalışmanın sonunda (başarılı veya hatalı) Telegram'a bildirim gönderilir.
+
+### Rapor Formatı
+
+**Başarılı koleksiyonda:**
+```
+🤖 The Miner — {TARİH}
+
+✅ Koleksiyon tamamlandı
+📦 Bu oturum: {BUGUN_TWEET} yeni tweet
+
+📊 Toplam DB: {TOPLAM} tweet
+  🇹🇷 TR: {TR_SAYI}
+  🇺🇸 EN: {EN_SAYI}
+⏳ Lab bekleyen: {ISLENMEMIS}
+
+━━━━━━━━━━━━━━━━━━
+📁 İçerik Formu
+━━━━━━━━━━━━━━━━━━
+  {icerik_formu satirlari}
+
+⭐ Kalite: S:{S} A:{A} B:{B} C:{C}
+```
+
+**Başarısız koleksiyonda:**
+```
+🤖 The Miner — {TARİH}
+
+❌ Koleksiyon basarisiz
+Sebep: {HATA_MESAJI}
+
+📊 Mevcut DB: {TOPLAM} tweet
+  🇹🇷 TR: {TR_SAYI}
+  🇺🇸 EN: {EN_SAYI}
+📅 Son basarili: {SON_SESSION_TARIHI}
+
+━━━━━━━━━━━━━━━━━━
+📁 İçerik Formu
+━━━━━━━━━━━━━━━━━━
+  {icerik_formu satirlari}
+
+⭐ Kalite: S:{S} A:{A} B:{B} C:{C}
+```
+
+### Gönderme Komutu
+
+Raporu `/tmp/miner_report_{SESSION_ID}.txt` dosyasına UTF-8 olarak yaz, ardından:
+
+```bash
+powershell.exe -ExecutionPolicy Bypass -File "C:/Users/ciftc/.codex/skills/pain-to-mvp-researcher/scripts/send-telegram-report.ps1" -Title "The Miner" -TextFile "/tmp/miner_report_{SESSION_ID}.txt"
+```
+
+Kimlik bilgileri `C:/Users/ciftc/.codex/skills/pain-to-mvp-researcher/.env` dosyasından otomatik okunur (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`).
+
+### Türkçe Karakter Notu
+
+- Rapor dosyası mutlaka **UTF-8 encoding** ile yazılmalı
+- PowerShell'de dosya yazarken: `Out-File -Encoding UTF8` veya `[System.IO.File]::WriteAllText(path, content, [System.Text.Encoding]::UTF8)`
+- Bash'te: `printf '%s' "$RAPOR" > /tmp/miner_report.txt` (varsayılan UTF-8)

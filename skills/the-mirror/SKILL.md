@@ -1,11 +1,6 @@
 ---
-name: The Mirror
-description: Kullanıcının geçmiş tweet verisini analiz eder, kişisel stil hafızası (style_memory) oluşturur ve The Creator'a kullanıcının içerik DNA'sını iletir. Her kullanıcının verisi izole tutulur.
-type: personalization
-pipeline_position: 3
-receives_from: [The Lab, User Input]
-feeds_into: The Creator
-data_isolation: /users/{userId}/style_memory
+name: the-mirror
+description: Kullanıcının geçmiş tweet verisini analiz eder, kişisel stil hafızası (style_memory) oluşturur ve The Creator'a kullanıcının içerik DNA'sını iletir. Pipeline pozisyon 3 — The Lab'dan beslenir, The Creator'a verir.
 ---
 
 # The Mirror — Kişisel Stil Analisti
@@ -27,213 +22,6 @@ The Mirror şu soruları yanıtlar:
 - The Lab'dan gelen hangi global trendler bu kullanıcının DNA'sıyla uyumlu?
 
 Her kullanıcının hafızası `/users/{userId}/style_memory` altında ayrı tutulur. Hiçbir kullanıcının verisi başka bir kullanıcıya sızmaz.
-
----
-
-## Stil Hafızası Şeması
-
-`/users/{userId}/style_memory` altında saklanan JSON yapısı:
-
-```json
-{
-  "userId": "string",
-  "handle": "@string",
-  "last_updated": "ISO-8601 timestamp",
-  "version": "integer (her güncellemede artar)",
-
-  "performance_snapshot": {
-    "total_impressions": "number",
-    "total_engagements": "number",
-    "avg_engagement_rate": "float (örn: 0.023)",
-    "verified_follower_ratio": "float (örn: 0.35)",
-    "top_signal_breakdown": {
-      "likes": "number",
-      "replies": "number",
-      "retweets": "number",
-      "bookmarks": "number",
-      "shares": "number",
-      "quote_tweets": "number"
-    },
-    "bookmark_to_like_ratio": "float (pratik içerik göstergesi)",
-    "retweet_to_like_ratio": "float (viral yayılma oranı)",
-    "reply_to_impression_ratio": "float (tartışma tetikleme oranı)"
-  },
-
-  "signature_expressions": {
-    "description": "Kullanıcının en sık kullandığı 10-15 ifade, terim veya kalıp",
-    "terms": [
-      {
-        "term": "string",
-        "frequency": "integer",
-        "context": "string (hangi bağlamda kullanılıyor)",
-        "avg_engagement_when_used": "float"
-      }
-    ]
-  },
-
-  "hook_patterns": {
-    "description": "En yüksek performanslı 10 tweet/thread'in ilk cümlesi ve kanca tipi",
-    "top_hooks": [
-      {
-        "hook_text": "string (ilk cümle, max 280 karakter)",
-        "hook_type": "enum: [soru, cesur_iddia, rakam_ile_bas, karsi_gorus, hikaye_baslangici, liste_vaadi, kisisel_itiraf, provokasyon]",
-        "tweet_engagement": "number",
-        "tweet_impressions": "number",
-        "engagement_rate": "float",
-        "why_it_worked": "string (The Mirror'ın analizi)"
-      }
-    ],
-    "hook_type_performance": {
-      "soru": "float (avg engagement rate)",
-      "cesur_iddia": "float",
-      "rakam_ile_bas": "float",
-      "karsi_gorus": "float",
-      "hikaye_baslangici": "float",
-      "liste_vaadi": "float",
-      "kisisel_itiraf": "float",
-      "provokasyon": "float"
-    },
-    "best_hook_type": "string (en yüksek avg engagement_rate'e sahip tür)"
-  },
-
-  "length_preference": {
-    "avg_tweet_char_count": "integer",
-    "avg_thread_tweet_count": "integer",
-    "short_tweet_performance": {
-      "range": "1-140 karakter",
-      "avg_engagement_rate": "float",
-      "sample_count": "integer"
-    },
-    "medium_tweet_performance": {
-      "range": "141-240 karakter",
-      "avg_engagement_rate": "float",
-      "sample_count": "integer"
-    },
-    "long_tweet_performance": {
-      "range": "241-280 karakter",
-      "avg_engagement_rate": "float",
-      "sample_count": "integer"
-    },
-    "thread_performance": {
-      "avg_thread_length": "integer (tweet sayısı)",
-      "avg_engagement_rate": "float",
-      "sample_count": "integer"
-    },
-    "optimal_length": "string (veri destekli öneri)"
-  },
-
-  "tone_profile": {
-    "description": "Tweet tonlarının analizi ve her tonun engagement performansı",
-    "distribution": {
-      "alaycı_satirik": "float (0-1 arası oran)",
-      "profesyonel_analitik": "float",
-      "samimi_kisisel": "float",
-      "eğitici_açıklayıcı": "float",
-      "motivasyonel": "float"
-    },
-    "tone_performance": {
-      "alaycı_satirik": {
-        "avg_engagement_rate": "float",
-        "strongest_signal": "string (like/RT/reply/bookmark)",
-        "sample_count": "integer"
-      },
-      "profesyonel_analitik": {
-        "avg_engagement_rate": "float",
-        "strongest_signal": "string",
-        "sample_count": "integer"
-      },
-      "samimi_kisisel": {
-        "avg_engagement_rate": "float",
-        "strongest_signal": "string",
-        "sample_count": "integer"
-      },
-      "eğitici_açıklayıcı": {
-        "avg_engagement_rate": "float",
-        "strongest_signal": "string",
-        "sample_count": "integer"
-      },
-      "motivasyonel": {
-        "avg_engagement_rate": "float",
-        "strongest_signal": "string",
-        "sample_count": "integer"
-      }
-    },
-    "dominant_tone": "string",
-    "highest_performing_tone": "string"
-  },
-
-  "successful_formats": [
-    {
-      "format_name": "string (örn: 'Numbered list thread', 'Tek cümle bomb', 'Soru + açıklama', 'Karşıt görüş + kanıt')",
-      "description": "string",
-      "avg_engagement_rate": "float",
-      "strongest_signal": "string (bu format hangi sinyali en çok üretiyor: like/RT/bookmark/reply)",
-      "sample_count": "integer",
-      "example_hook": "string (bu formattan bir örnek ilk cümle)"
-    }
-  ],
-
-  "weak_patterns": [
-    {
-      "pattern_name": "string",
-      "description": "string (ne yapıyor kullanıcı)",
-      "avg_engagement_rate": "float",
-      "diagnosis": "string (neden düşük performans)",
-      "fix_suggestion": "string (The Creator için düzeltme önerisi)"
-    }
-  ],
-
-  "optimal_posting_times": {
-    "method": "string (manuel gözlem / X Analytics / API verisi)",
-    "timezone": "string (örn: Europe/Istanbul)",
-    "best_days": ["string"],
-    "best_hours": [
-      {
-        "hour": "integer (0-23)",
-        "relative_performance": "string (yüksek/orta/düşük)",
-        "note": "string"
-      }
-    ],
-    "worst_hours": ["integer"],
-    "recommended_schedule": "string (pratik özet)"
-  },
-
-  "niche_connections": {
-    "description": "Hangi hesaplara reply/quote yapılınca yüksek engagement geliyor",
-    "high_value_accounts": [
-      {
-        "handle": "@string",
-        "interaction_type": "enum: [reply, quote, mention]",
-        "avg_engagement_boost": "string (örn: '2x normal')",
-        "why_valuable": "string (kitleleri örtüşüyor / niche authority / viral amplifier)"
-      }
-    ],
-    "content_niches": ["string (örn: Agentic AI, MCP protokolü, vibe coding, LangChain, multi-agent)"],
-    "niche_keywords": ["string (SEO + algoritma için güçlü kelimeler)"]
-  },
-
-  "cta_history": {
-    "description": "Kullanıcının CTA kullanım geçmişi ve performansı",
-    "cta_usage_rate": "float (CTA içeren tweet oranı)",
-    "cta_types_used": ["string"],
-    "cta_performance": {
-      "with_cta_avg_engagement": "float",
-      "without_cta_avg_engagement": "float",
-      "cta_lift": "float (fark)"
-    },
-    "recommended_ctas": ["string (kullanıcının tonuna uyan CTA önerileri)"]
-  },
-
-  "evolution_log": [
-    {
-      "date": "ISO-8601",
-      "trigger": "string (manual_setup / high_engagement_tweet / periodic_update)",
-      "change_summary": "string",
-      "version": "integer"
-    }
-  ]
-}
-```
 
 ---
 
@@ -287,81 +75,71 @@ Analiz sırasında şunlara odaklan:
 
 ## İlk Kurulum Süreci
 
-Kullanıcı The Mirror'ı ilk kez kullandığında şu adımlar uygulanır:
+Veri toplama tamamen otomatiktir. Manuel tweet yapıştırmaya gerek yoktur.
 
-### Adım 1 — Veri Toplama
+### Adım 1 — Cookie Kurulumu (Tek Seferlik)
 
-Kullanıcıdan aşağıdaki veriler istenir:
+1. Chrome'a **Cookie-Editor** eklentisini kur
+2. `x.com`'da oturum aç
+3. Cookie-Editor ile tüm cookie'leri **JSON formatında** dışa aktar
+4. Dosyayı `skills/the-mirror/cookies.json` olarak kaydet
 
-**Seçenek A (Tercih edilen): X Analytics ekran görüntüsü + tweet listesi**
-- Son 90 günün analytics özeti (impression, engagement, top tweet'ler)
-- Son 50-100 tweeti metin olarak veya URL listesi olarak
-
-**Seçenek B: Manuel yapıştırma**
-- Kullanıcı en iyi performanslı 20-30 tweetini metin olarak yapıştırır
-- Her tweet için mümkünse: like, RT, reply, bookmark sayısı
-- Kullanıcı kendi gözlemlediği "iyi giden" ve "kötü giden" örnekler
-
-**Seçenek C: Hızlı başlangıç (minimum veri)**
-- Kullanıcı 5-10 tweetini yapıştırır
-- Temel profil oluşturulur, eksik alanlar "tahmini" olarak işaretlenir
-- Güncelleme protokolü devreye girer ve hafıza zamanla zenginleşir
-
-### Adım 2 — İlk Analiz
-
-Toplanan veriler Analiz Promptu'na gönderilir. Çıktı olarak `style_memory` JSON'u oluşturulur ve `/users/{userId}/style_memory` path'ine kaydedilir.
-
-### Adım 3 — Kullanıcı Doğrulaması
-
-Oluşturulan profil özetle birlikte kullanıcıya gösterilir:
+### Adım 2 — .env Dosyasını Doldur
 
 ```
-Seni tanıdım. İşte DNA'n:
-
-Dominant Ton: Profesyonel/Analitik (%60) | Eğitici (%30)
-En Güçlü Format: Numbered list thread → ortalama %3.1 engagement rate
-En Güçlü Kanca Tipi: Cesur iddia + rakam
-İmza İfadeler: "agentic", "multi-agent", "MCP", "pipeline", "vibe coding"
-Zayıf Nokta: Retweet çok az (%1.2 RT/Like) → CTA eksikliği tespit edildi
-
-Bu doğru mu? Eklemek veya düzeltmek istediğin bir şey var mı?
+USERNAME=twitter_kullanici_adi
+EMAIL=email@example.com
+PASSWORD=sifre
+USER_ID=twitter_numerik_id
 ```
 
-Kullanıcı onaylarsa hafıza kilitlenir ve `version: 1` olarak kaydedilir.
+`USER_ID` için: x.com'da oturum açıkken `twid` cookie'sinin değeri `u%3D{USER_ID}` formatındadır.
 
-### Adım 4 — @ciftcibahadir İçin Ön Doldurulmuş Başlangıç Değerleri
+### Adım 3 — İlk Sync
 
-@ciftcibahadir hesabı için mevcut metriklerden elde edilen başlangıç snapshot'ı:
-
-```json
-{
-  "userId": "ciftcibahadir",
-  "handle": "@ciftcibahadir",
-  "performance_snapshot": {
-    "total_impressions": 254800,
-    "total_engagements": 5900,
-    "avg_engagement_rate": 0.023,
-    "verified_follower_ratio": 0.35,
-    "top_signal_breakdown": {
-      "likes": 843,
-      "replies": 389,
-      "retweets": 10,
-      "bookmarks": 479,
-      "shares": 37,
-      "quote_tweets": null
-    },
-    "bookmark_to_like_ratio": 0.568,
-    "retweet_to_like_ratio": 0.012,
-    "reply_to_impression_ratio": 0.00153
-  },
-  "niche_connections": {
-    "content_niches": ["Agentic AI", "multi-skill pipeline", "vibe coding", "MCP protokolü", "LangChain", "multi-agent sistemler"],
-    "niche_keywords": ["agentic", "agent", "MCP", "pipeline", "LangChain", "multi-agent", "vibe coding", "LLM", "Claude", "skill"]
-  }
-}
+```bash
+python skills/the-mirror/mirror_sync.py
 ```
 
-Not: Bu değerler ilk kurulum sırasında kullanıcının gerçek tweet verisiyle zenginleştirilir.
+Script çalışır, son 200 tweet çeker ve `style_memory.json`'u oluşturur. Örnek çıktı:
+
+```
+Yeni tweet     : 200
+Toplam arsiv   : 200
+Yuksek perf.   : 14
+Ort. eng. rate : %4.33
+style_memory.json guncellendi
+```
+
+Bundan sonra Mirror AI doğrudan `style_memory.json`'u okuyarak DNA raporu üretir.
+
+### Periyodik Sync
+
+Haftalık olarak aynı komutu çalıştır:
+
+```bash
+python skills/the-mirror/mirror_sync.py
+```
+
+Script incremental çalışır: son sync'ten bu yana gelen yeni tweet'leri ekler, mevcut arşivi korur (rolling 1000 tweet penceresi).
+
+---
+
+## Depolama Mimarisi
+
+Tüm veri tek bir dosyada tutulur: `skills/the-mirror/style_memory.json`
+
+**Neden JSON, veritabanı değil?**
+
+| Kriter | Durum |
+|--------|-------|
+| Ölçek | 1000 tweet × ~500B = ~500KB — DB gereksiz |
+| Eşzamanlılık | Tek kullanıcı, tek process — lock mekanizması yok |
+| Güvenlik | Atomic write (mkstemp + os.replace) — crash-safe |
+| Gizlilik | Lokal disk, bulut yok |
+| Debug | İnsan okunabilir, `cat style_memory.json` ile incelenebilir |
+
+`tweet_archive` son 1000 tweet'i tutar. Daha eskiler silinir. Eski tweet engagement verisi zamanla anlamsızlaşır — kayan pencere yeterlidir.
 
 ---
 
@@ -719,28 +497,29 @@ DNA Raporu, The Creator'ın içerik üretirken elinde tutacağı belgedir. Belir
 
 ÇALIŞMA AKIŞI:
 
-Adım 1 — Kullanıcı tweet verisi sağlarsa: Analiz Promptu'nu uygula, style_memory'yi doldur.
-Adım 2 — The Lab trend paketi gelirse: Global Trend Filtresi'ni uygula, uyumluluk skorlarını hesapla.
-Adım 3 — DNA Raporu oluştur: style_memory + filtrelenmiş trendleri birleştirerek The Creator formatında çıktı üret.
-Adım 4 — Güncelleme isteği gelirse: İlgili alanları güncelle, version'ı artır, evolution_log'a kayıt ekle.
+Adım 1 — Aktivasyon: style_memory.json'u oku. Staleness kontrolü yap (>7 gün ise uyar). tweet_archive sayısını kontrol et.
+Adım 2 — Veri agregasyonu: hook_type ve tone başına ort. engagement_rate hesapla. high_performers'dan imza ifadeleri çıkar.
+Adım 3 — DNA Raporu oluştur: Hesaplanan değerleri DNA Raporu Çıktı Şeması'na doldur. JSON kod bloğu olarak sun.
+Adım 4 — The Lab trend paketi gelirse: Global Trend Filtresi'ni uygula, uyumluluk skorlarını hesapla, DNA raporuna ekle.
 
-Her yanıtında hangi adımda olduğunu ve style_memory'nin hangi version'ını kullandığını belirt.
+Her yanıtında style_memory version'ını ve tweet_archive sayısını belirt.
 ```
 
 ---
 
 ## Örnek Kullanım
 
-### Senaryo 1: İlk Kurulum
+### Senaryo 1: İlk Kullanım (Sync Tamamlandı)
 
 **Kullanıcı:**
-> "Son 20 tweetimi aşağıya yapıştırıyorum. Analiz et ve benim için bir stil profili oluştur. [tweet listesi]"
+> "mirror_sync.py çalıştırdım, DNA raporu üret."
 
 **The Mirror'ın Davranışı:**
-1. Analiz Promptu'nu tweet listesine uygular.
-2. style_memory JSON'unu doldurur (eksik alanlar null veya "tahmini").
-3. Kullanıcıya özet sunar, onay ister.
-4. Onay gelince `/users/ciftcibahadir/style_memory` path'ine kaydeder, version: 1 olarak işaretler.
+1. `style_memory.json`'u okur.
+2. Staleness kontrolü: `last_synced_at` bugüne yakınsa uyarı yok.
+3. `tweet_archive` üzerinde hook ve tone agregasyonunu hesaplar.
+4. `high_performers` listesinden imza ifadeleri çıkarır.
+5. DNA Raporu şemasını doldurur ve JSON kod bloğu olarak sunar.
 
 ---
 
@@ -836,9 +615,39 @@ Bu şema mirror_sync.py'nin DEFAULT_STYLE_MEMORY sabiti ve run_sync() fonksiyonu
     "retweet_to_like_ratio": "float veya null",
     "reply_to_impression_ratio": "float veya null"
   },
-  "hook_patterns": {},
-  "tone_profile": {},
-  "signature_expressions": {},
+  "hook_patterns": {
+    "hook_type_performance": {
+      "soru":          { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "cesur_iddia":   { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "rakam_ile_bas": { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "karsi_gorus":   { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "hikaye":        { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "liste_vaadi":   { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "provokasyon":   { "avg_engagement_rate": "float", "sample_count": "integer" },
+      "diger":         { "avg_engagement_rate": "float", "sample_count": "integer" }
+    },
+    "best_hook_type": "string — en yüksek avg_engagement_rate'e sahip hook_type"
+  },
+  "tone_profile": {
+    "tone_performance": {
+      "profesyonel": { "avg_engagement_rate": "float", "distribution": "float 0-1", "sample_count": "integer" },
+      "samimi":      { "avg_engagement_rate": "float", "distribution": "float 0-1", "sample_count": "integer" },
+      "egitici":     { "avg_engagement_rate": "float", "distribution": "float 0-1", "sample_count": "integer" },
+      "alayci":      { "avg_engagement_rate": "float", "distribution": "float 0-1", "sample_count": "integer" },
+      "heyecanli":   { "avg_engagement_rate": "float", "distribution": "float 0-1", "sample_count": "integer" }
+    },
+    "dominant_tone": "string — en sık kullanılan tone",
+    "highest_performing_tone": "string — en yüksek avg_engagement_rate'e sahip tone"
+  },
+  "signature_expressions": {
+    "terms": [
+      {
+        "term": "string",
+        "frequency": "integer — high_performers'da kaç tweette geçiyor",
+        "avg_engagement_when_used": "float"
+      }
+    ]
+  },
   "evolution_log": [
     {
       "date": "ISO-8601",
@@ -850,13 +659,15 @@ Bu şema mirror_sync.py'nin DEFAULT_STYLE_MEMORY sabiti ve run_sync() fonksiyonu
 }
 ```
 
-**KRİTİK: Boş Alanlar**
+**Profil Alanları — Script Tarafından Otomatik Güncellenir**
 
-`hook_patterns`, `tone_profile` ve `signature_expressions` alanları mirror_sync.py tarafından her zaman boş `{}` olarak yazılır. Mirror AI bu alanları `tweet_archive` üzerinden analiz zamanında hesaplar:
+`hook_patterns`, `tone_profile` ve `signature_expressions` alanları `mirror_sync.py` tarafından **her sync'te** `tweet_archive` üzerinden hesaplanarak yazılır. Mirror AI bu alanları **doğrudan okur** — runtime'da yeniden hesaplamaz.
 
-- `hook_patterns` → `tweet_archive` üzerindeki her `hook_type` değeri için ortalama `engagement_rate` hesapla
-- `tone_profile` → `tweet_archive` üzerindeki her `tone` değeri için ortalama `engagement_rate` hesapla
-- `signature_expressions` → `high_performers` listesindeki tweetlerin `text` alanlarından 3+ tweette geçen terimleri bul. `signature_expressions` alanını OKU değil — daima boştur.
+- `hook_patterns.hook_type_performance` — Her hook_type için avg engagement_rate + sample_count
+- `hook_patterns.best_hook_type` — En yüksek avg_engagement_rate'e sahip hook tipi
+- `tone_profile.tone_performance` — Her tone için avg engagement_rate + dağılım oranı
+- `tone_profile.dominant_tone` / `highest_performing_tone` — Otomatik seçilir
+- `signature_expressions.terms` — `high_performers`'da 2+ tweette geçen kelimeler, engagement'a göre sıralı top-15
 
 ---
 
@@ -889,12 +700,17 @@ style_memory.json içindeki `last_synced_at` değerini oku.
 - Eğer tweet sayısı < 20 ise: TAHMINİ moduna gir (bkz. "Veri Yeterliliği Kontrolü" bölümü).
 - Eğer tweet sayısı >= 20 ise: HIGH güvenilirlik modunda devam et.
 
-### Adım 3 — Veri Agregasyonu
+### Adım 3 — Profil Alanlarını Oku
 
-tweet_archive üzerinde şunları hesapla:
-- Her `hook_type` için ortalama `engagement_rate` (hook_patterns)
-- Her `tone` için ortalama `engagement_rate` (tone_profile)
-- `high_performers` tweetlerinin `text` alanlarından imza ifadeleri çıkar (signature_expressions)
+`hook_patterns`, `tone_profile`, `signature_expressions` alanları mirror_sync.py tarafından önceden hesaplanmış ve kaydedilmiştir. Bunları doğrudan oku:
+
+- `hook_patterns.best_hook_type` — En iyi hook tipi
+- `hook_patterns.hook_type_performance` — Her hook tipi için avg engagement + sample_count
+- `tone_profile.dominant_tone` / `highest_performing_tone` — Kullanım ve performans dominansı
+- `tone_profile.tone_performance` — Her ton için dağılım oranı ve avg engagement
+- `signature_expressions.terms` — High_performers'dan çıkarılmış imza kelimeler
+
+Eğer bu alanlar boş `{}` ise: Kullanıcıya `python skills/the-mirror/mirror_sync.py` çalıştırmasını söyle.
 
 ### Adım 4 — DNA Raporu Üret
 

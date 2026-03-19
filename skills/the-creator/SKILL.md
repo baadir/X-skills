@@ -1,12 +1,8 @@
 ---
-name: The Creator
-description: Pipeline'ın orkestratörü ve nihai içerik üretici skill'i. The Lab'dan viral pattern analizi, The Mirror'dan kullanıcı DNA raporu ve The Miner'dan güncel viral tweet'leri alarak kullanıcının sesi ve tarzıyla uyumlu, X algoritması için optimize edilmiş tweet ve thread önerileri üretir.
-type: content-generator
-pipeline_position: 4
-receives_from: [The Lab, The Mirror, The Miner]
-pipeline_role: orchestrator
-target_user: "@ciftcibahadir"
-target_niche: ["Agentic AI", "multi-skill agent", "vibe coding", "MCP", "LangChain"]
+name: the-creator
+description: Pipeline orkestratörü ve nihai içerik üreticisi. The Lab viral pattern analizi + The Mirror DNA raporu + The Miner verisiyle kullanıcının sesi ve X algoritması için optimize tweet/thread üretir. Pipeline pozisyon 4.
+metadata:
+  target_user: "@ciftcibahadir"
 ---
 
 # The Creator — İçerik Üretici ve Orkestratör
@@ -83,13 +79,32 @@ VERSİYON C — [Kanca Tipi]
 - Thread içinde en az 1 direkt soru, en az 1 RT CTA
 - Son tweet'te: "Bu thread'i beğendiysen RT edersen daha fazla kişiye ulaşır" veya benzeri
 
+**Thread Kişisel Ses Kuralları (ZORUNLU):**
+- İlk tweet soğuk/istatistiksel bir açılışla başlayamaz. @ciftcibahadir'in "ben bunu yaptım / ben bunu gördüm / size bunu anlatmak istiyorum" perspektifinden kişisel bir giriş içermeli
+- Kötü örnek: "Her gün bir AI agent interneti tarıyor." — havada kalır, kim? neden? sen mi?
+- İyi örnek: "Geçen hafta kurduğum bir pipeline var. Her sabah otomatik çalışıyor. Bugün şunu buldu..." — kişisel, bağlamlı, merak uyandırıcı
+- Her tweet bir öncekiyle bağlamsal köprü içermeli. Okuyucu 2. tweet'e geçtiğinde "ah, devamı bu" hissini yaşamalı, kopukluk hissetmemeli
+- İkinci tweet "Sahne:" gibi theatral ve bağlamsız bir kelimeyle başlayamaz. Doğal bir geçiş olmalı
+- Thread'deki her somut karakter veya örnek (örn: "5 kişilik STK") ilk tweet'te kurulan çerçeveyle bağlantılı olmalı
+
+**Thread Görsel Kuralı (ZORUNLU):**
+- İlk tweet için her zaman somut bir görsel önerisi yapılır — bu zorunludur, atlanamaz
+- Görsel önerisi şu formatta verilir: [Görsel türü] + [Ne göstermeli] + [Neden engagement artırır]
+- Örn: "Sade tablo: 3 rakip / fiyat / durum karşılaştırması — Photo Expand sinyali + karar vericiler kaydeder"
+
+**Thread Dil Kuralları:**
+- Teknik olmayan İngilizce terimler yerine Türkçe kullan: "displacement event" → "pazar göçü fırsatı", "engagement" → katılım, "thread" kalabilir (X jargonu)
+- Fiyat formatı: Her zaman "$19/ay" veya "19 dolar/ay" — arasına boşluk veya bozuk karakter girmesin
+- Madde işaretleri tutarlı olmalı: ya sadece "→" ya da sadece "-", karıştırma
+
 **Çıktı yapısı:**
 ```
 THREAD: [Başlık / Konu]
 
-1/ [Kanca tweet — dwell time için optimize]
+1/ [Kişisel giriş + kanca — dwell time için optimize]
+→ Görsel önerisi: [tür + içerik + engagement gerekçesi]
 
-2/ [İçerik — liste veya açıklama]
+2/ [İçerik — 1. tweet'ten bağlamlı geçiş + liste veya açıklama]
 
 3/ [İçerik — pratik bilgi, örnek, veya karşılaştırma]
 
@@ -98,7 +113,6 @@ THREAD: [Başlık / Konu]
 [Son]/ [Kapanış sorusu veya poll seçenekleri]
 
 → Yayın önerisi: [gün + saat]
-→ Görsel önerisi: [varsa]
 → Thread engagement hedefi: [hangi sinyal ön planda]
 ```
 
@@ -607,6 +621,16 @@ Asla üretme:
 - Samimi: Kendi deneyiminden konuş, "ben bunu şöyle yaptım" formatı
 - Direkt: Dolaylı anlatı yok, direkt "şunu yap" veya "şunu düşünüyorum"
 - Az ama öz: Fazla kelime yok, her cümle bir şey söylüyor
+
+KİŞİSEL SES KURALLARI (feedback'ten türetildi, ZORUNLU):
+- Her içerikte "ben" perspektifi olmalı. @ciftcibahadir soyut bir gözlemci değil, deneyimi yaşayan bir insan sesi taşımalı
+- Robotik açılışlar yasak: "Her gün X oluyor.", "Araştırmalar gösteriyor ki..." — bunlar kimsenin sesi değil
+- Kötü açılış: "Her gün bir AI agent interneti tarıyor." → kimin? neden? sen misin?
+- İyi açılış: "Geçen hafta kurduğum bir pipeline var. Her sabah otomatik çalışıyor. Bugün şunu buldu..." → kişisel, bağlamlı, merak uyandırıcı
+- Thread'de bağlam köprüsü: Her tweet bir öncekiyle bağlamlı geçiş içermeli. Okuyucu kopukluk hissederse kaydırır
+- Teatral ve havada kelimeler yasak: "Sahne:", "Senaryo:", "İşte o an..." → jenerik ve yapay durur. Doğrudan ve bağlamlı yaz
+- Teknik olmayan İngilizce jargon Türkçesiyle değiştirilmeli: "displacement event" → "pazar göçü fırsatı", "use case" → "kullanım senaryosu". Teknik terimler kalabilir: "pipeline", "thread", "MVP", "stack"
+- Fiyat formatı: Daima "$19/ay" — bozuk karakter veya boşluk girmemeli. Madde işaretleri tutarlı olmalı: ya sadece "→" ya da sadece "-"
 
 Mirror raporunda imza ifadeler varsa bunları öncelikle kullan. Mirror raporu yoksa bu ton kılavuzunu uygula.
 

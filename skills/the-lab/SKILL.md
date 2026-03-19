@@ -1,12 +1,9 @@
 ---
-name: The Lab
-description: The Miner'dan gelen ham tweet verisini Batch API ile stratejik kategorilere ayırır. Her tweet için 6 boyutlu sınıflandırma etiketi üretir; çıktıyı The Mirror ve The Creator'a iletir.
-type: data-processor
-pipeline_position: 2
-receives_from: The Miner
-feeds_into: [The Mirror, The Creator]
-status: prompt-only
-circuit: closed
+name: the-lab
+description: The Miner'dan gelen ham tweet verisini Batch API ile stratejik kategorilere ayırır. Her tweet için 6 boyutlu sınıflandırma etiketi üretir; çıktıyı The Mirror ve The Creator'a iletir. Pipeline pozisyon 2.
+metadata:
+  status: prompt-only
+  circuit: closed
 ---
 
 > **Kapsam Sınırı (v1):** Bu skill şu an **prompt-only**'dir — kapalı devre fabrika katmanı.

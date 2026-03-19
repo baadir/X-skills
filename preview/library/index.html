@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TwitterYoldas — Thread Kütüphanesi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/library/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🐦</span>
+        <span class="logo-text">TwitterYoldas <span class="logo-sub">Kütüphane</span></span>
+      </div>
+      <div class="header-actions">
+        <input class="search-input" id="search-input" type="text" placeholder="🔍  Thread ara..." oninput="filterDrafts()" />
+        <a class="preview-link" href="/" target="_blank">↗ Önizleme</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT: Draft List -->
+    <aside class="sidebar">
+      <div class="sidebar-tabs">
+        <button class="tab active" data-filter="all"    onclick="setFilter('all',this)">Tümü</button>
+        <button class="tab"        data-filter="öneri"  onclick="setFilter('öneri',this)">Taslak</button>
+        <button class="tab"        data-filter="atılmış" onclick="setFilter('atılmış',this)">Atılmış</button>
+      </div>
+      <div class="draft-list" id="draft-list">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <div class="empty-text">Yükleniyor...</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Thread Preview -->
+    <main class="preview-pane" id="preview-pane">
+      <div class="empty-state center">
+        <div class="empty-icon">👈</div>
+        <div class="empty-text">Sol taraftan bir thread seç</div>
+        <div class="empty-sub">Thread'e tıklayınca burada görünür.</div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Image Lightbox -->
+  <div class="img-lightbox" id="img-lightbox" onclick="closeImageLightbox()">
+    <button class="img-lightbox-close" onclick="closeImageLightbox()">✕</button>
+    <img id="img-lightbox-img" src="" alt="Görsel" onclick="event.stopPropagation()" />
+  </div>
+
+  <script src="/library/app.js"></script>
+</body>
+</html>

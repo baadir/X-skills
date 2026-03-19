@@ -1,0 +1,29 @@
+# Secrets & credentials
+.env
+*.cookies
+cookies/
+
+# Data & databases
+data/
+preview/data/
+*.db
+*.sqlite
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Node / React
+node_modules/
+dist/
+.vite/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code internals
+.claude/

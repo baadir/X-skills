@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TwitterYoldas — Tweet Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">🐦</span>
+        <span class="logo-text">TwitterYoldas <span class="logo-sub">Preview</span></span>
+      </div>
+      <div class="header-meta" id="header-meta">Yükleniyor...</div>
+      <button class="refresh-btn" onclick="loadThread()">↻ Yenile</button>
+    </div>
+  </header>
+
+  <!-- Main Layout -->
+  <main class="main-layout">
+
+    <!-- LEFT: Thread Preview -->
+    <section class="thread-panel" id="thread-panel">
+      <div class="panel-title">
+        <span class="panel-icon">💬</span> Thread Önizleme
+        <span class="tweet-count" id="tweet-count"></span>
+      </div>
+      <div class="thread-container" id="thread-container">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <div class="empty-text">Creator skill çıktısı bekleniyor...</div>
+          <div class="empty-sub">Thread üretildikten sonra otomatik görünür.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Analysis Panel -->
+    <aside class="analysis-panel" id="analysis-panel">
+      <div class="panel-title">
+        <span class="panel-icon">📊</span> Creator Analizi
+      </div>
+      <div id="analysis-container">
+        <div class="empty-state">
+          <div class="empty-icon">📈</div>
+          <div class="empty-text">Analiz bekleniyor...</div>
+        </div>
+      </div>
+    </aside>
+
+  </main>
+
+  <!-- Image Lightbox -->
+  <div class="img-lightbox" id="img-lightbox" onclick="closeImageLightbox()">
+    <button class="img-lightbox-close" onclick="closeImageLightbox()">✕</button>
+    <img id="img-lightbox-src" src="" alt="Görsel" onclick="event.stopPropagation()" />
+  </div>
+
+  <!-- Tweet Detail Modal -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModal()">
+    <div class="modal-card" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <!-- Feedback Panel (sabit sağ alt) -->
+  <div class="feedback-fab" id="feedback-fab" onclick="toggleFeedback()">
+    💬 <span id="fab-label">Feedback</span>
+    <span class="feedback-badge" id="feedback-badge" style="display:none">0</span>
+  </div>
+
+  <div class="feedback-panel" id="feedback-panel">
+    <div class="feedback-panel-header">
+      <span>📝 Tweet Feedback</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="fb-clear-btn" onclick="clearFeedback()">Temizle</button>
+        <button class="fb-send-btn" id="fb-send-btn" onclick="sendFeedback()">Claude'a Gönder ↗</button>
+        <button class="feedback-close" onclick="toggleFeedback()">✕</button>
+      </div>
+    </div>
+    <div class="feedback-panel-body">
+      <div class="fb-tweet-select">
+        <label>Tweet seç:</label>
+        <select id="fb-tweet-num">
+          <option value="0">Tüm thread</option>
+        </select>
+      </div>
+      <div class="fb-category-select">
+        <label>Kategori:</label>
+        <div class="fb-categories" id="fb-categories">
+          <button class="fb-cat active" data-cat="ton">Ton</button>
+          <button class="fb-cat" data-cat="kanca">Kanca</button>
+          <button class="fb-cat" data-cat="uzunluk">Uzunluk</button>
+          <button class="fb-cat" data-cat="dil">Dil</button>
+          <button class="fb-cat" data-cat="içerik">İçerik</button>
+          <button class="fb-cat" data-cat="genel">Genel</button>
+        </div>
+      </div>
+      <textarea id="fb-comment" class="fb-textarea" placeholder="Feedback'inizi yazın... (örn: '2. tweet çok uzun, kısalt')"></textarea>
+      <button class="fb-add-btn" onclick="addFeedbackItem()">+ Ekle</button>
+      <div class="fb-list" id="fb-list"></div>
+      <div class="fb-hint" id="fb-hint" style="display:none">
+        ✅ Feedback kaydedildi. Claude Code'da bir sonraki mesajınızla birlikte otomatik gönderilecek.
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
