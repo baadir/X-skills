@@ -3,9 +3,9 @@
 miner.py — The Miner (Twitter API v2 — cookie'siz)
 
 Twitter API v2 Bearer Token ile viral tweet toplar.
-İki strateji paralel çalışır:
-  1. NİŞ sorguları  — AI, MCP, LangChain, vibe coding vb.
-  2. GENEL VİRAL    — niş bağımsız, sadece engagement eşiğiyle
+İki sorgu katmanı çalışır:
+  1. FORMAT sorguları — konu bağımsız, viral format sinyalleri (thread, unpopular opinion vb.)
+  2. TOPIC sorguları  — girişim, futbol, siyaset, magazin, sektör profesyonelleri, AI/tech
 
 Kullanım:
   python ingestion/miner.py                     # quick mode (varsayılan)
@@ -54,33 +54,31 @@ TWITTER_API_BASE = "https://api.twitter.com/2"
 # Sorgu stratejileri
 # ─────────────────────────────────────────────────────────────────────────────
 
-# 1. Nişe özel — topic keyword (free tier: engagement operatörü yok, post-fetch filtre)
-NICHE_QUERIES = [
-    # AI agent / agentic
-    "(\"AI agent\" OR \"agentic AI\" OR \"multi-agent\") -is:retweet",
-    # MCP / araçlar
-    "(\"MCP\" OR \"model context protocol\" OR \"claude mcp\") -is:retweet",
-    # Framework / tooling
-    "(LangChain OR LangGraph OR CrewAI OR AutoGen) -is:retweet",
-    # Vibe coding / AI coding
-    "(\"vibe coding\" OR \"claude code\" OR \"cursor ai\" OR windsurf) -is:retweet",
-    # Türkçe niş
-    "(\"yapay zeka\" OR \"AI agent\") lang:tr -is:retweet",
+# 1. Format bazlı — konu bağımsız, yüksek viral sinyal taşıyan içerik formatları
+FORMAT_QUERIES = [
+    # Evrensel viral format sinyalleri (İngilizce)
+    '("unpopular opinion" OR "hot take" OR "nobody talks about") lang:en -is:retweet',
+    '("I went from" OR "I built" OR "I quit") lang:en -is:retweet',
+    # Türkçe viral format sinyalleri
+    '("kimse söylemiyor" OR "açıkça söyleyeyim" OR "iğneleyici") lang:tr -is:retweet',
+    '("🧵" OR "thread") lang:tr -is:retweet',
 ]
 
-# 2. Genel viral — niş bağımsız: bilinen viral hesaplar + high-signal topic'ler
-# min_faves free tier'da yok → post-fetch filtre ile yüksek like eşiği uygulanır
-VIRAL_QUERIES = [
-    # Referans AI hesaplar — kaliteli + viral içerik üretirler
-    "(from:karpathy OR from:swyx OR from:levelsio OR from:mckaywrigley OR from:bentossell) -is:retweet",
-    # Üst düzey founder/builder hesapları
-    "(from:sama OR from:elonmusk OR from:paulg OR from:naval OR from:dhh) -is:retweet",
-    # AI startup / araştırma hesapları
-    "(from:AnthropicAI OR from:OpenAI OR from:GoogleDeepMind OR from:mistralai) -is:retweet",
-    # Thread formatı — genellikle yüksek engagement
-    "\U0001f9f5 lang:en -is:retweet",
-    # Türkçe genel viral
-    "lang:tr -is:retweet (teknoloji OR yazılım OR kariyer OR girişim OR iş)",
+# 2. Konu bazlı — geniş yelpaze, hesap bağımsız
+TOPIC_QUERIES = [
+    # Girişimcilik / İş dünyası
+    '(girişim OR startup OR "iş hayatı" OR patron OR "kendi işim") lang:tr -is:retweet',
+    # Futbol
+    '(futbol OR "Süper Lig" OR Galatasaray OR Fenerbahçe OR Beşiktaş) lang:tr -is:retweet',
+    # Magazin / Sosyal
+    '(dizi OR ünlü OR magazin OR "sosyal medya") lang:tr -is:retweet',
+    # Siyasi/politik
+    '(siyaset OR politika OR seçim) lang:tr -is:retweet',
+    # Sektör profesyonelleri
+    '(avukat OR doktor OR mühendis OR "finans uzmanı") lang:tr -is:retweet',
+    # AI/tech — niche ama değerli
+    '("AI agent" OR "vibe coding" OR "claude code" OR "cursor ai") lang:en -is:retweet',
+    '("MCP" OR "model context protocol") lang:en -is:retweet',
 ]
 
 # Mode başına sorgu başına tweet limiti
@@ -91,9 +89,13 @@ LIMIT_PER_QUERY = {
 
 # Post-fetch filtre — free tier'da engagement operatörü olmadığından burada uygula
 MIN_LIKES = {
-    "niche":  {"en": 30,  "tr": 10},
-    "viral":  {"en": 200, "tr": 50},
+    "en": 30,
+    "tr": 10,
 }
+
+# Takipçi filtreleri — büyük hesapları dışla, bot/spam'i dışla
+MAX_FOLLOWERS = 500_000
+MIN_FOLLOWERS = 50
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -306,6 +308,9 @@ def _build_record(
         "source":               "x_api",
         "query_used":           query,
         "collection_session_id": "",  # run_collection tarafından doldurulur
+
+        "tweet_url":            f"https://x.com/{user.get('username', '')}/status/{tweet['id']}" if user.get("username") else None,
+        "virality_punch":       round((likes / max(user_metrics.get("followers_count") or 100, 100)) * 100, 4),
     }
 
 
@@ -313,11 +318,15 @@ def _build_record(
 # Post-fetch filtre
 # ─────────────────────────────────────────────────────────────────────────────
 
-def passes_threshold(rec: dict, strategy: str) -> bool:
-    """Minimum like eşiğini geç."""
+def passes_threshold(rec: dict) -> bool:
+    """Minimum like eşiği + takipçi tavan/taban kontrolü."""
     lang = rec.get("language", "en") if rec.get("language") in ("en", "tr") else "en"
-    min_l = MIN_LIKES[strategy][lang]
-    return rec.get("likes", 0) >= min_l
+    if rec.get("likes", 0) < MIN_LIKES.get(lang, MIN_LIKES["en"]):
+        return False
+    followers = rec.get("author_followers") or 0
+    if followers > MAX_FOLLOWERS or followers < MIN_FOLLOWERS:
+        return False
+    return True
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -330,8 +339,7 @@ def run_collection(mode: str, session_id: str) -> list[dict[str, Any]]:
     all_records: list[dict] = []
     seen_ids: set[str] = set()
 
-    def _run_queries(queries: list[str], strategy: str) -> None:
-        label = "NİŞ" if strategy == "niche" else "VİRAL"
+    def _run_queries(queries: list[str], label: str) -> None:
         for query in queries:
             logger.info("[%s] %s", label, query[:80])
             try:
@@ -348,7 +356,7 @@ def run_collection(mode: str, session_id: str) -> list[dict[str, Any]]:
                     continue
                 if rec["text"].startswith("RT @"):
                     continue
-                if not passes_threshold(rec, strategy):
+                if not passes_threshold(rec):
                     continue
                 seen_ids.add(tid)
                 rec["collection_session_id"] = session_id
@@ -358,8 +366,8 @@ def run_collection(mode: str, session_id: str) -> list[dict[str, Any]]:
             logger.info("  %d/%d tweet geçti (toplam: %d)", passed, len(records), len(all_records))
             time.sleep(1.5)  # sorgular arası nazik bekleme
 
-    _run_queries(NICHE_QUERIES, "niche")
-    _run_queries(VIRAL_QUERIES, "viral")
+    _run_queries(FORMAT_QUERIES, "FORMAT")
+    _run_queries(TOPIC_QUERIES, "TOPIC")
 
     logger.info("Toplam: %d benzersiz tweet toplandı.", len(all_records))
     return all_records
@@ -393,7 +401,7 @@ def build_session_json(session_id: str, tweets: list[dict], mode: str) -> dict:
         "dataset_count":    0,
 
         "collection_stats": {
-            "api_calls_made":       len(NICHE_QUERIES) + len(VIRAL_QUERIES),
+            "api_calls_made":       len(FORMAT_QUERIES) + len(TOPIC_QUERIES),
             "tweets_fetched_raw":   len(tweets),
             "tweets_after_filter":  len(tweets),
             "filter_pass_rate":     1.0,

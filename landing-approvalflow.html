@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ApprovalFlow — İç Mimarlar İçin Müşteri Onay Portali</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pink: #FF71CE;
+      --pink2: #FF0055;
+      --cyan: #00F5FF;
+      --cyan2: #01CDFE;
+      --purple: #B967FF;
+      --yellow: #FFCC00;
+      --blue: #0000FF;
+      --white: #FFFFFF;
+      --dark: #1C1C1C;
+      --charcoal: #2D2D2D;
+      --rubber: #2A1A3E;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #0A0010;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ─── SCANLINES OVERLAY ─── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* ─── UTILITY ─── */
+    .gradient-text {
+      background: linear-gradient(135deg, var(--pink), var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .gradient-text-hot {
+      background: linear-gradient(90deg, var(--pink2), var(--yellow));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .glow-pink { text-shadow: 0 0 20px rgba(255,113,206,0.8), 0 0 40px rgba(255,113,206,0.4); }
+    .glow-cyan { text-shadow: 0 0 20px rgba(0,245,255,0.8), 0 0 40px rgba(0,245,255,0.4); }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2.5rem;
+      background: rgba(10,0,16,0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(185,103,255,0.2);
+    }
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .nav-logo span { color: var(--pink); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: rgba(255,255,255,0.7);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--cyan); }
+    .nav-cta {
+      background: var(--pink2);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 20px rgba(255,0,85,0.4);
+    }
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(255,0,85,0.6);
+    }
+
+    /* ─── HERO ─── */
+    #hero {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto;
+      gap: 0;
+      padding: 8rem 2.5rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(185,103,255,0.15) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(185,103,255,0.15) 1px, transparent 1px);
+      background-size: 60px 60px;
+      perspective: 500px;
+      transform: rotateX(60deg) translateY(-30%);
+      transform-origin: center bottom;
+    }
+    .hero-orb-1 {
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(185,103,255,0.3), transparent 70%);
+      top: -100px; right: -100px;
+      animation: pulse 4s ease-in-out infinite;
+    }
+    .hero-orb-2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,245,255,0.2), transparent 70%);
+      bottom: 0; left: -80px;
+      animation: pulse 5s ease-in-out infinite reverse;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.1); opacity: 1; }
+    }
+    .hero-left {
+      grid-column: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      padding-right: 2rem;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,113,206,0.1);
+      border: 1px solid rgba(255,113,206,0.4);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 1.5rem;
+      width: fit-content;
+    }
+    .hero-badge::before {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--pink);
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    .hero-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+    .hero-title .accent { color: var(--yellow); }
+    .hero-sub {
+      font-size: 1.125rem;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.65);
+      max-width: 480px;
+      margin-bottom: 2.5rem;
+    }
+    .hero-actions { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--pink2), var(--purple));
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 0 30px rgba(255,0,85,0.5);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 50px rgba(255,0,85,0.7);
+    }
+    .btn-ghost {
+      color: rgba(255,255,255,0.7);
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .btn-ghost:hover { color: var(--cyan); }
+    .hero-price-note {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.05em;
+    }
+    .hero-right {
+      grid-column: 2;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ─── MOCK UI CARD ─── */
+    .mock-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(185,103,255,0.3);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%;
+      max-width: 440px;
+      backdrop-filter: blur(20px);
+      box-shadow:
+        0 0 60px rgba(185,103,255,0.15),
+        inset 0 1px 0 rgba(255,255,255,0.1);
+      position: relative;
+      transform: rotate(-1deg) translateY(-10px);
+    }
+    .mock-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+    .mock-card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+    .mock-status-pill {
+      background: rgba(0,245,255,0.1);
+      border: 1px solid rgba(0,245,255,0.3);
+      color: var(--cyan);
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 100px;
+      letter-spacing: 0.1em;
+    }
+    .mock-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.875rem;
+      background: rgba(255,255,255,0.04);
+      border-radius: 10px;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: border-color 0.2s;
+    }
+    .mock-item:hover { border-color: rgba(185,103,255,0.3); }
+    .mock-thumb {
+      width: 52px; height: 52px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .mock-thumb.v1 { background: linear-gradient(135deg, #FF71CE, #B967FF); }
+    .mock-thumb.v2 { background: linear-gradient(135deg, #01CDFE, #B967FF); }
+    .mock-thumb.v3 { background: linear-gradient(135deg, #FFCC00, #FF71CE); }
+    .mock-item-info { flex: 1; min-width: 0; }
+    .mock-item-name {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .mock-item-meta {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.4);
+    }
+    .mock-btns { display: flex; gap: 0.4rem; flex-shrink: 0; }
+    .mock-btn {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      transition: transform 0.1s;
+    }
+    .mock-btn:hover { transform: scale(1.15); }
+    .mock-btn.approve { background: rgba(0,245,255,0.15); color: var(--cyan); }
+    .mock-btn.reject { background: rgba(255,0,85,0.15); color: var(--pink2); }
+    .mock-btn.comment { background: rgba(185,103,255,0.15); color: var(--purple); }
+    .mock-approved-bar {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: rgba(0,245,255,0.08);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 10px;
+      font-size: 0.8rem;
+      color: var(--cyan);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .mock-approved-count {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+    .mock-floating {
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      background: rgba(255,204,0,0.15);
+      border: 1px solid var(--yellow);
+      border-radius: 10px;
+      padding: 0.6rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--yellow);
+      letter-spacing: 0.05em;
+      transform: rotate(3deg);
+      box-shadow: 0 0 20px rgba(255,204,0,0.3);
+    }
+
+    /* ─── PAIN SECTION ─── */
+    #pain {
+      padding: 6rem 2.5rem;
+      background: linear-gradient(180deg, #0A0010 0%, #0D0020 100%);
+      position: relative;
+    }
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .section-label::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--pink);
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    .pain-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .pain-card {
+      background: rgba(255,0,85,0.05);
+      border: 1px solid rgba(255,0,85,0.2);
+      border-radius: 14px;
+      padding: 1.75rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .pain-card:hover {
+      border-color: rgba(255,0,85,0.5);
+      transform: translateY(-4px);
+    }
+    .pain-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--pink2), transparent);
+    }
+    .pain-emoji {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+    .pain-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: rgba(255,255,255,0.95);
+    }
+    .pain-card p {
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ─── HOW IT WORKS ─── */
+    #how {
+      padding: 6rem 2.5rem;
+      background: #0D0020;
+    }
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 4rem;
+      position: relative;
+    }
+    .steps-container::before {
+      content: '';
+      position: absolute;
+      top: 32px;
+      left: calc(25% / 2);
+      right: calc(25% / 2);
+      height: 1px;
+      background: linear-gradient(90deg, var(--pink), var(--cyan), var(--purple), var(--cyan));
+      z-index: 0;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 1;
+    }
+    .step-num {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      border: 2px solid;
+      position: relative;
+    }
+    .step:nth-child(1) .step-num { border-color: var(--pink); background: rgba(255,113,206,0.1); color: var(--pink); box-shadow: 0 0 20px rgba(255,113,206,0.3); }
+    .step:nth-child(2) .step-num { border-color: var(--cyan); background: rgba(0,245,255,0.1); color: var(--cyan); box-shadow: 0 0 20px rgba(0,245,255,0.3); }
+    .step:nth-child(3) .step-num { border-color: var(--purple); background: rgba(185,103,255,0.1); color: var(--purple); box-shadow: 0 0 20px rgba(185,103,255,0.3); }
+    .step:nth-child(4) .step-num { border-color: var(--yellow); background: rgba(255,204,0,0.1); color: var(--yellow); box-shadow: 0 0 20px rgba(255,204,0,0.3); }
+    .step h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .step p {
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ─── FEATURES ─── */
+    #features {
+      padding: 6rem 2.5rem;
+      background: linear-gradient(180deg, #0D0020, #0A0010);
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+      align-items: start;
+    }
+    .features-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .feature-item {
+      display: flex;
+      gap: 1.25rem;
+      padding: 1.25rem;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      border-radius: 12px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .feature-item:hover {
+      border-color: rgba(185,103,255,0.3);
+      background: rgba(185,103,255,0.05);
+    }
+    .feature-icon {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .feature-icon.pink { background: rgba(255,113,206,0.15); }
+    .feature-icon.cyan { background: rgba(0,245,255,0.15); }
+    .feature-icon.purple { background: rgba(185,103,255,0.15); }
+    .feature-icon.yellow { background: rgba(255,204,0,0.15); }
+    .feature-text h4 {
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+    .feature-text p {
+      font-size: 0.825rem;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.5;
+    }
+    .features-right {
+      position: sticky;
+      top: 6rem;
+    }
+    .big-feature-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(185,103,255,0.25);
+      border-radius: 20px;
+      padding: 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .big-feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(185,103,255,0.15), transparent 70%);
+    }
+    .big-feature-card .big-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+      display: block;
+      filter: drop-shadow(0 0 20px rgba(0,245,255,0.5));
+    }
+    .big-feature-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    .big-feature-card p {
+      color: rgba(255,255,255,0.6);
+      line-height: 1.7;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+    .link-preview {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(0,245,255,0.2);
+      border-radius: 10px;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.5);
+      position: relative;
+      z-index: 1;
+    }
+    .link-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+      flex-shrink: 0;
+    }
+    .link-url {
+      color: var(--cyan);
+      font-family: 'Space Grotesk', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* ─── SOCIAL PROOF ─── */
+    #social {
+      padding: 5rem 2.5rem;
+      background: #0A0010;
+    }
+    .testimonial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+    .testimonial {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 1.75rem;
+      position: relative;
+      transition: transform 0.2s;
+    }
+    .testimonial:hover { transform: translateY(-4px); }
+    .testimonial:nth-child(2) { transform: translateY(-16px); }
+    .testimonial:nth-child(2):hover { transform: translateY(-20px); }
+    .quote-mark {
+      font-size: 3rem;
+      line-height: 1;
+      color: var(--pink);
+      opacity: 0.4;
+      font-family: Georgia, serif;
+      margin-bottom: 0.5rem;
+    }
+    .testimonial p {
+      font-size: 0.9rem;
+      line-height: 1.65;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .avatar {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .avatar.a1 { background: linear-gradient(135deg, var(--pink), var(--purple)); }
+    .avatar.a2 { background: linear-gradient(135deg, var(--cyan), var(--blue)); }
+    .avatar.a3 { background: linear-gradient(135deg, var(--yellow), var(--pink2)); color: #000; }
+    .author-info .name { font-weight: 700; font-size: 0.875rem; }
+    .author-info .role { font-size: 0.75rem; color: rgba(255,255,255,0.4); }
+    .stars { color: var(--yellow); font-size: 0.75rem; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+
+    /* ─── PRICING ─── */
+    #pricing {
+      padding: 6rem 2.5rem;
+      background: linear-gradient(180deg, #0A0010, #0D0025);
+    }
+    .pricing-wrapper {
+      max-width: 860px;
+      margin: 3rem auto 0;
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+    .pricing-card {
+      border-radius: 20px;
+      padding: 2rem;
+      border: 1px solid;
+    }
+    .pricing-card.free {
+      background: rgba(255,255,255,0.03);
+      border-color: rgba(255,255,255,0.1);
+    }
+    .pricing-card.pro {
+      background: rgba(185,103,255,0.08);
+      border-color: rgba(185,103,255,0.4);
+      position: relative;
+      box-shadow: 0 0 60px rgba(185,103,255,0.15);
+    }
+    .pricing-card.pro::before {
+      content: 'EN POPÜLER';
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--pink2), var(--purple));
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      padding: 0.3rem 1rem;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .pricing-name {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      color: rgba(255,255,255,0.5);
+    }
+    .pricing-card.pro .pricing-name { color: var(--pink); }
+    .pricing-price {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+    .pricing-period { font-size: 0.85rem; color: rgba(255,255,255,0.4); margin-bottom: 1.5rem; }
+    .pricing-features { list-style: none; margin-bottom: 2rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      color: rgba(255,255,255,0.7);
+    }
+    .pricing-features li::before {
+      content: '✓';
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(0,245,255,0.15);
+      color: var(--cyan);
+      font-size: 0.7rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .pricing-features li.muted { color: rgba(255,255,255,0.3); }
+    .pricing-features li.muted::before {
+      content: '—';
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.3);
+    }
+    .btn-pricing {
+      width: 100%;
+      padding: 0.875rem;
+      border-radius: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-pricing.free-btn {
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.15);
+    }
+    .btn-pricing.free-btn:hover { background: rgba(255,255,255,0.12); }
+    .btn-pricing.pro-btn {
+      background: linear-gradient(135deg, var(--pink2), var(--purple));
+      color: white;
+      box-shadow: 0 0 30px rgba(255,0,85,0.4);
+    }
+    .btn-pricing.pro-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 50px rgba(255,0,85,0.6);
+    }
+
+    /* ─── CTA ─── */
+    #cta {
+      padding: 8rem 2.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      background: #0A0010;
+    }
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(185,103,255,0.25), transparent 70%);
+    }
+    .cta-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(185,103,255,0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(185,103,255,0.1) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    #cta .section-title {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      position: relative;
+      z-index: 1;
+    }
+    #cta p {
+      color: rgba(255,255,255,0.6);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 1.5rem auto 3rem;
+      line-height: 1.7;
+      position: relative;
+      z-index: 1;
+    }
+    .cta-actions { position: relative; z-index: 1; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .cta-note {
+      margin-top: 1.5rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.35);
+      position: relative;
+      z-index: 1;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: #070010;
+      border-top: 1px solid rgba(185,103,255,0.15);
+      padding: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .footer-logo {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+    }
+    .footer-logo span { color: var(--pink); }
+    footer p {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.3);
+    }
+    .footer-links { display: flex; gap: 1.5rem; }
+    .footer-links a {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--pink); }
+
+    /* ─── IRIDESCENT ANIMATION ─── */
+    @keyframes hue-shift {
+      0% { filter: hue-rotate(0deg); }
+      100% { filter: hue-rotate(360deg); }
+    }
+    .iridescent {
+      animation: hue-shift 8s linear infinite;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) {
+      #hero { grid-template-columns: 1fr; padding: 7rem 2rem 4rem; }
+      .hero-right { display: none; }
+      .pain-grid { grid-template-columns: 1fr 1fr; }
+      .steps-container { grid-template-columns: 1fr 1fr; }
+      .steps-container::before { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .features-right { position: static; }
+      .testimonial-grid { grid-template-columns: 1fr; }
+      .testimonial:nth-child(2) { transform: none; }
+      .pricing-wrapper { grid-template-columns: 1fr; max-width: 420px; }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 1rem 1.25rem; }
+      .nav-links { display: none; }
+      #hero, #pain, #how, #features, #social, #pricing, #cta { padding-left: 1.25rem; padding-right: 1.25rem; }
+      .pain-grid { grid-template-columns: 1fr; }
+      .steps-container { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 1rem; text-align: center; }
+      .footer-links { justify-content: center; }
+    }
+
+    /* ─── CHROMATIC ABERRATION on title ─── */
+    .chroma {
+      position: relative;
+      display: inline-block;
+    }
+    .chroma::before {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: -2px;
+      color: var(--pink);
+      opacity: 0.5;
+      mix-blend-mode: screen;
+    }
+    .chroma::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0; left: 2px;
+      color: var(--cyan);
+      opacity: 0.5;
+      mix-blend-mode: screen;
+    }
+
+    /* ─── HOVER ANIMATIONS ─── */
+    .mock-item { cursor: default; }
+    .mock-item.approved { border-color: rgba(0,245,255,0.4); background: rgba(0,245,255,0.06); }
+    .mock-item.rejected { border-color: rgba(255,0,85,0.4); background: rgba(255,0,85,0.06); }
+
+    /* ─── STATS BAR ─── */
+    .stats-bar {
+      display: flex;
+      gap: 3rem;
+      flex-wrap: wrap;
+      margin-top: 3rem;
+      padding-top: 2rem;
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .stat-item {}
+    .stat-num {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.4);
+      letter-spacing: 0.05em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Approval<span>Flow</span></div>
+    <ul class="nav-links">
+      <li><a href="#how">Nasıl Çalışır</a></li>
+      <li><a href="#features">Özellikler</a></li>
+      <li><a href="#pricing">Fiyatlar</a></li>
+    </ul>
+    <button class="nav-cta">Ücretsiz Başla</button>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-orb-1"></div>
+    <div class="hero-orb-2"></div>
+
+    <div class="hero-left">
+      <div class="hero-badge">İç Mimarlar İçin Üretildi</div>
+
+      <h1 class="hero-title">
+        Müşteri onayı<br>
+        <span class="gradient-text">kaos olmak</span><br>
+        zorunda değil<span class="accent">.</span>
+      </h1>
+
+      <p class="hero-sub">
+        Mood board yükle, müşteri linke tıkla, her kalemi tek tiklayla onayla veya reddet.
+        Revizyon geçmişi saklanır, onaylanan liste siparişe dönüşür. E-posta hesabı gerekmez.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#pricing" class="btn-primary">14 Gün Ücretsiz Dene</a>
+        <a href="#how" class="btn-ghost">
+          Nasıl çalışır?
+          <span>→</span>
+        </a>
+      </div>
+
+      <div class="stats-bar">
+        <div class="stat-item">
+          <span class="stat-num gradient-text">%40</span>
+          <span class="stat-label">Pandemi sonrası freelance büyüme</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" style="color:var(--cyan)">3-4<small style="font-size:1rem">dk</small></span>
+          <span class="stat-label">Ortalama müşteri onay süresi</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-num" style="color:var(--yellow)">$0</span>
+          <span class="stat-label">İlk 14 gün kredi kartı yok</span>
+        </div>
+      </div>
+
+      <p class="hero-price-note">Sonrasında sadece 25 USD/ay · İstediğin zaman iptal et</p>
+    </div>
+
+    <div class="hero-right">
+      <div class="mock-card">
+        <div class="mock-floating">✓ 3 ürün onaylandı</div>
+        <div class="mock-card-header">
+          <div class="mock-card-title">Salon Projesi — v2</div>
+          <div class="mock-status-pill">CANLI</div>
+        </div>
+
+        <div class="mock-item approved">
+          <div class="mock-thumb v1"></div>
+          <div class="mock-item-info">
+            <div class="mock-item-name">Krem Deri Koltuk — Kare</div>
+            <div class="mock-item-meta">Modoko / ₺12,400</div>
+          </div>
+          <div class="mock-btns">
+            <button class="mock-btn approve">✓</button>
+            <button class="mock-btn reject">✕</button>
+            <button class="mock-btn comment">💬</button>
+          </div>
+        </div>
+
+        <div class="mock-item">
+          <div class="mock-thumb v2"></div>
+          <div class="mock-item-info">
+            <div class="mock-item-name">Travertine Sehpa — Oval</div>
+            <div class="mock-item-meta">Alışveriş Merkezi / ₺8,900</div>
+          </div>
+          <div class="mock-btns">
+            <button class="mock-btn approve">✓</button>
+            <button class="mock-btn reject">✕</button>
+            <button class="mock-btn comment">💬</button>
+          </div>
+        </div>
+
+        <div class="mock-item rejected">
+          <div class="mock-thumb v3"></div>
+          <div class="mock-item-info">
+            <div class="mock-item-name">Velvet Perde — Taba</div>
+            <div class="mock-item-meta">İthalat / ₺5,200</div>
+          </div>
+          <div class="mock-btns">
+            <button class="mock-btn approve">✓</button>
+            <button class="mock-btn reject">✕</button>
+            <button class="mock-btn comment">💬</button>
+          </div>
+        </div>
+
+        <div class="mock-approved-bar">
+          <span>Onaylanan kalemler</span>
+          <span class="mock-approved-count">2 / 3</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PAIN -->
+  <section id="pain">
+    <div class="section-label">Tanıdık Geliyor mu?</div>
+    <h2 class="section-title">
+      E-posta + Canva + Excel =<br>
+      <span class="gradient-text-hot">Teslimatta Kriz</span>
+    </h2>
+
+    <div class="pain-grid">
+      <div class="pain-card">
+        <span class="pain-emoji">📧</span>
+        <h3>Yorumlar E-postada Kayboluyor</h3>
+        <p>Müşteri PDF'e yorum bırakır, siz başka version gönderirsiniz, hangisi güncel belli olmaz. 12 e-posta sonra herkes karışır.</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">📋</span>
+        <h3>Onay Belgesi Yok</h3>
+        <p>"Ben onu onaylamamıştım" anı. Teslimatta müşteri inkar eder, siz de elinizde tutunacak hiçbir şey olmadan özür dilersiniz.</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">🔁</span>
+        <h3>Revizyon Versiyonu Takibi</h3>
+        <p>v1, v2_final, v2_final_GERÇEK dosya isimleri… Hangi ürün değişti, müşteri ne gördü, revision geçmişi kafanızda.</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">💸</span>
+        <h3>Pahalı Araçlar Yanlış İş İçin</h3>
+        <p>Houzz Pro aylık $65+, tasarım yazılımı odaklı. DesignFiles iş akışı yönetiminde yetersiz. İkisi de müşteri onay kaosunu çözmüyor.</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">🛒</span>
+        <h3>Sipariş Listesi Elle Çıkartılıyor</h3>
+        <p>Onaylanan kalemleri tek tek Excel'e aktarırsınız. Sonra tedarikçilere ayrı ayrı gönderirsiniz. Her seferinde aynı işkence.</p>
+      </div>
+      <div class="pain-card">
+        <span class="pain-emoji">🔐</span>
+        <h3>Müşteri Kayıt İstiyor</h3>
+        <p>60 yaşındaki müşteri "uygulama indir" veya "hesap aç" derken projeden soğuyor. Erişim engeli = geç onay = geciken teslim.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="section-label">Süreç</div>
+    <h2 class="section-title">4 Adımda <span class="gradient-text">Temiz Onay</span></h2>
+
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-num">01</div>
+        <h3>Proje Oluştur</h3>
+        <p>Mood board görsellerini ve ürün listesini yükle. Fiyat, tedarikçi, not ekle.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <h3>Link Gönder</h3>
+        <p>Tek tıkla paylaşılabilir link oluştur. Müşteriye WhatsApp veya SMS ile gönder. Kayıt yok, uygulama yok.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <h3>Müşteri Onaylar</h3>
+        <p>Her kalem için ✓ Onayla / ✕ Reddet / 💬 Yorum. Anlık bildirim alırsın. Revizyon talep edilirse yeni versiyon açılır.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <h3>Sipariş Listesi Hazır</h3>
+        <p>Onaylananlar otomatik sipariş kontrol listesine dönüşür. PDF export et, tedarikçiye gönder.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-label">Özellikler</div>
+    <h2 class="section-title">Sadece İhtiyacın <span class="gradient-text">Olan Şeyler</span></h2>
+
+    <div class="features-grid">
+      <div class="features-left">
+        <div class="feature-item">
+          <div class="feature-icon pink">🖼️</div>
+          <div class="feature-text">
+            <h4>Görsel + Ürün Listesi</h4>
+            <p>Mood board görselleri, ürün referansları, fiyat ve tedarikçi bilgisini tek yerde topla.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon cyan">🔗</div>
+          <div class="feature-text">
+            <h4>Şifresiz Link Erişimi</h4>
+            <p>Müşteri e-posta hesabı açmak zorunda değil. Link = erişim. Tek tık, anında portal.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon purple">📝</div>
+          <div class="feature-text">
+            <h4>Kalem Bazlı Onay + Yorum</h4>
+            <p>Onayla, reddet veya yorum bırak. Her karar zaman damgalı kayıt altında, tartışmaya yer yok.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon yellow">🔄</div>
+          <div class="feature-text">
+            <h4>Versiyon Geçmişi</h4>
+            <p>Revizyon geldiğinde v2, v3 oluştur. Tüm versiyonlar arşivde, müşteri ne onayladı tam belli.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon pink">📦</div>
+          <div class="feature-text">
+            <h4>Sipariş Listesi Export</h4>
+            <p>Onaylanan kalemler otomatik listeye geçer. PDF veya CSV export et, işin bitti.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon cyan">🔔</div>
+          <div class="feature-text">
+            <h4>Anlık Bildirimler</h4>
+            <p>Müşteri onaylayınca anında haber al. Proje takıldı mı? Hatırlatma gönder.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="features-right">
+        <div class="big-feature-card">
+          <span class="big-icon iridescent">🔗</span>
+          <h3>Müşteri <span class="gradient-text">Linke Tıklar</span>,<br>Hepsi Bu.</h3>
+          <p>
+            Uygulamayı indirmek yok. Kayıt olmak yok. Şifre hatırlamak yok.
+            Müşterini 60 yaşında olsun 25 yaşında — tek tık ile projeye girer, onaylar, biter.
+          </p>
+          <div class="link-preview">
+            <div class="link-dot"></div>
+            <span class="link-url">approvalflow.co/p/salon-projesi-zeynep</span>
+          </div>
+          <div style="margin-top:1.5rem; padding:1rem; background:rgba(0,245,255,0.05); border-radius:10px; border:1px solid rgba(0,245,255,0.15); position:relative; z-index:1;">
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:0.5rem; letter-spacing:0.05em; text-transform:uppercase;">Onay Belgesi</div>
+            <div style="font-size:0.85rem; color:rgba(255,255,255,0.8); line-height:1.6;">
+              Zeynep A. tarafından <strong style="color:var(--cyan)">14 Mart 2024, 16:42</strong>'de onaylandı.<br>
+              <small style="color:rgba(255,255,255,0.4)">IP: 185.x.x.x · Cihaz: iPhone 15</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF -->
+  <section id="social">
+    <div class="section-label">Kullanıcı Yorumları</div>
+    <h2 class="section-title">İç Mimarlar <span class="gradient-text">Ne Diyor</span></h2>
+
+    <div class="testimonial-grid">
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <div class="quote-mark">"</div>
+        <p>Artık müşteriye PDF göndermiyorum. Linki atıyorum, telefona bakıyorum, onay geliyor. Bir haftada 3 proje bitirdim, normalde 2 hafta sürerdi.</p>
+        <div class="testimonial-author">
+          <div class="avatar a1">SA</div>
+          <div class="author-info">
+            <div class="name">Selin Arslan</div>
+            <div class="role">Freelance İç Mimar, İstanbul</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <div class="quote-mark">"</div>
+        <p>Müşteri "Ben onu onaylamamıştım" dedi. ApprovalFlow'u açtım, zaman damgasını gösterdim. Konuşma bitti. Bu araç beni 10.000 TL'lik bir anlaşmazlıktan kurtardı.</p>
+        <div class="testimonial-author">
+          <div class="avatar a2">MY</div>
+          <div class="author-info">
+            <div class="name">Mert Yıldırım</div>
+            <div class="role">İç Mimarlık Stüdyosu, Ankara</div>
+          </div>
+        </div>
+      </div>
+      <div class="testimonial">
+        <div class="stars">★★★★★</div>
+        <div class="quote-mark">"</div>
+        <p>Houzz Pro'yu bıraktım. Benim ihtiyacım tasarım yazılımı değil, müşteri süreç yönetimi. ApprovalFlow tam olarak bu — sade, hızlı, işe yarıyor.</p>
+        <div class="testimonial-author">
+          <div class="avatar a3">EK</div>
+          <div class="author-info">
+            <div class="name">Elif Kaya</div>
+            <div class="role">Dekoratif Tasarımcı, İzmir</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing">
+    <div style="text-align:center;">
+      <div class="section-label" style="justify-content:center;">Fiyatlandırma</div>
+      <h2 class="section-title">Sade Fiyat, <span class="gradient-text">Sürpriz Yok</span></h2>
+    </div>
+
+    <div class="pricing-wrapper">
+      <div class="pricing-card free">
+        <div class="pricing-name">Başlangıç</div>
+        <div class="pricing-price">$0</div>
+        <div class="pricing-period">sonsuza kadar ücretsiz</div>
+        <ul class="pricing-features">
+          <li>2 aktif proje</li>
+          <li>Temel onay akışı</li>
+          <li>Link erişimi</li>
+          <li class="muted">Versiyon geçmişi</li>
+          <li class="muted">Export (PDF/CSV)</li>
+          <li class="muted">Onay belgesi</li>
+          <li class="muted">Sınırsız proje</li>
+        </ul>
+        <button class="btn-pricing free-btn">Ücretsiz Başla</button>
+      </div>
+
+      <div class="pricing-card pro">
+        <div class="pricing-name">Pro</div>
+        <div class="pricing-price gradient-text">$25</div>
+        <div class="pricing-period">/ ay · istediğin zaman iptal</div>
+        <ul class="pricing-features">
+          <li>Sınırsız proje</li>
+          <li>Tam onay akışı</li>
+          <li>Şifresiz link erişimi</li>
+          <li>Versiyon geçmişi</li>
+          <li>PDF + CSV export</li>
+          <li>Zaman damgalı onay belgesi</li>
+          <li>Anlık bildirimler</li>
+        </ul>
+        <button class="btn-pricing pro-btn">14 Gün Ücretsiz Dene →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="cta">
+    <div class="cta-bg"></div>
+    <div class="cta-grid"></div>
+    <h2 class="section-title">
+      Bir Sonraki Projen<br>
+      <span class="gradient-text">Temiz Başlasın.</span>
+    </h2>
+    <p>Müşteri onay kaosunu bugün bitir. 2 dakikada hesap aç, ilk projeyi oluştur — kredi kartı gerekmez.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-primary" style="font-size:1.1rem; padding:1.1rem 3rem;">Ücretsiz Başla</a>
+    </div>
+    <p class="cta-note">14 gün ücretsiz · Kredi kartı yok · İstediğin zaman iptal</p>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">Approval<span>Flow</span></div>
+    <p>© 2024 ApprovalFlow. İç mimarlar için.</p>
+    <div class="footer-links">
+      <a href="#">Gizlilik</a>
+      <a href="#">Kullanım Koşulları</a>
+      <a href="#">İletişim</a>
+    </div>
+  </footer>
+
+  <script>
+    // Interactive mock card
+    document.querySelectorAll('.mock-btn.approve').forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.mock-item');
+        item.classList.remove('rejected');
+        item.classList.toggle('approved');
+      });
+    });
+    document.querySelectorAll('.mock-btn.reject').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const item = btn.closest('.mock-item');
+        item.classList.remove('approved');
+        item.classList.toggle('rejected');
+      });
+    });
+
+    // Iridescent effect on scroll
+    let lastScrollY = 0;
+    window.addEventListener('scroll', () => {
+      const scrollY = window.scrollY;
+      const hue = (scrollY / 5) % 360;
+      document.querySelectorAll('.gradient-text').forEach(el => {
+        el.style.filter = `hue-rotate(${hue * 0.1}deg)`;
+      });
+      lastScrollY = scrollY;
+    });
+
+    // Smooth scroll for nav links
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

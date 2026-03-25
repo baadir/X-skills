@@ -226,6 +226,66 @@ HİBRİT SEÇENEĞİ (opsiyonel):
 
 ---
 
+### Mod 6 — Seri Devamı Modu
+**Tetikleyici:** Kullanıcı bir tweet URL'i veya ID'si verir ve "devam serisi olarak yaz", "bu tweet'in devamı", "seriye ekle" gibi bir ifade kullanır.
+
+**Ne yapar:**
+1. Orijinal tweet'i X API v2 Bearer Token (`X_BEARER_TOKEN`) ile çeker — twikit değil, doğrudan `https://api.twitter.com/2/tweets/{id}` endpoint'i kullanılır
+2. Orijinal tweet'in stilini, açılış formatını, rakam yapısını ve "Detaylar 👇" gibi imza elementlerini analiz eder
+3. Yeni konuyu/fikri, orijinal serideki ton ve yapıyla birebir uyumlu şekilde yazar
+4. Seri numaralandırması otomatik belirlenir: orijinal tweet #1 ise bu #2 olur, kullanıcı numara verirse ona uyulur
+5. Görsel format ID'si orijinaldeki ile aynı kalır (ör. `ai_startup_factory_series`)
+
+**Seri Tutarlılığı Kuralları (ZORUNLU):**
+- İlk tweet açılışı orijinalin kalıbını takip eder:
+  - Orijinal "Pipeline X kaynağı taradı" → yeni "Pipeline bu sefer X'i taradı"
+  - Orijinal kişisel giriş içeriyorsa → yeni de kişisel girişle başlar
+  - Orijinal rakam + metrik formatındaysa → yeni de aynı rakam formatını kullanır
+- Seri adı korunur: "AI Startup Factory Serisi #2", "AI Startup Factory Serisi #3" gibi
+- "Detaylar 👇" veya orijinaldeki devam sinyali birebir korunur
+- Metrik formatı tutarlı kalır: "X kaynak, Y pain point, Z bulgu" yapısı varsa aynı şablonla devam edilir
+- Orijinal tweetin kullandığı madde işareti stili (→ veya -) korunur
+
+**Tweet Çekme Prosedürü:**
+```python
+import requests, os
+from dotenv import load_dotenv
+load_dotenv()
+
+tweet_id = "<URL'den veya ID'den parse et>"
+bearer = os.getenv('X_BEARER_TOKEN')
+r = requests.get(
+    f"https://api.twitter.com/2/tweets/{tweet_id}",
+    headers={"Authorization": f"Bearer {bearer}"},
+    params={"tweet.fields": "text,public_metrics,created_at", "expansions": "author_id"}
+)
+original = r.json()['data']
+```
+
+**Çıktı yapısı:**
+```
+SERİ: [Seri Adı] #[Numara] — [Yeni Konu]
+(Orijinal tweet: [tweet URL])
+
+1/ [Orijinal açılış kalıbıyla yeni kanca — kişisel + metrik]
+→ Görsel önerisi: [orijinaldeki format ID ile tutarlı]
+
+2/ [Problem derinleştirme — orijinal tona uygun]
+
+3/ [Rakip / pazar analizi — orijinal liste yapısıyla]
+
+4/ [Çözüm konsepti — kısa, net]
+
+5/ [Büyüme mekaniği veya fırsat gerekçesi]
+
+6/ [Kapanış sorusu + RT CTA]
+
+→ Yayın önerisi: [gün + saat]
+→ Seri tutarlılık skoru: [Yüksek / Orta / Düşük] + neden
+```
+
+---
+
 ## Bağlam Birleştirme Mantığı
 
 The Creator üç farklı raporu alır. Bu raporları birbirinden bağımsız kullanmaz — üçünü tek bir sentez işleminden geçirir.
@@ -326,6 +386,73 @@ The Creator her içerik üretiminde aşağıdaki kuralları otomatik olarak uygu
 - Hafta sonu: Engagement düşer — büyük içerik için önerilmez
 - Timezone: UTC+3 (Türkiye) — ancak global kitle varsa UTC+0 göz önünde bulundurulur
 
+### Spark Format Kuralı (2026 Meta)
+- X algoritması okuma süresini ölçüyor — 400+ karakter = uzun dwell time = fazla gösterim
+- **Optimal uzunluk: 400-600 karakter** — tek tweet için en iyi performans gösteren aralık
+- Yapı: **Hook + Build + Punch** — kanca ile aç, argümanı inşa et, güçlü kapanışla bitir
+- Quote tweet ile birleşince (Quote + Spark combo) etki katlanır
+- Tek bir Spark tweet zaman zaman thread'i geçebilir — zorla uzatma
+- Görsel eklenmesi Spark format'ı güçlendirir
+
+### Self Reply Taktiği
+- Kendi tweet'ine 2-3 dakika içinde reply atmak engagement'ı 3x artırır
+- Self-reply = "devam eden konuşma" sinyali = daha fazla gösterim; yorum kısmının dolu görünmesi = social proof
+- İlk reply 2-3 dk içinde atılmalı; her reply'da farklı değer sunulmalı (ek bilgi, kaynak, CTA veya hikaye)
+- Son reply'da her zaman CTA olmalı — max 3-4 reply (fazlası spam sinyali)
+- Örnek yapı:
+  - Ana tweet: "İçerik pazarlamasında 3 yıldır yaptığım en büyük hata..."
+  - Reply 1: "Bu hatayı fark ettikten sonra yaptığım değişiklik..."
+  - Reply 2: "Sonuçlar: [metrikler]"
+  - Reply 3: "Sen de aynı hatayı yapıyor olabilirsin. Kontrol et: [CTA]"
+
+### Quote Tweet Stratejisi
+- **2025-2026 meta: X algoritması quote tweet'leri %40 daha fazla dağıtıyor** — kendi yorum + quote combo = şu an en güçlü format
+- X algoritması quote tweet'leri "orijinal düşünce" olarak değerlendiriyor — kendi yorumunu eklemek "değer katıyor" sinyali veriyor
+- Trend tweet'lere **ilk 2 saatte** quote at — gecikme engagement'ı düşürür
+- Sadece onaylamak değil, gerçek değer eklenmeli: kendi deneyimini, farklı açıyı veya verini ekle
+- Nişine çek: quote'u kendi uzmanlık alanına bağla
+- Görsel eklenirse etkileşim 2x artar
+- **Quote + Spark Format kombinu** (400-600 karakter kendi yorumun + quote) = algoritmanın en çok ödüllendirdiği format
+- İyi quote örnekleri:
+  - ✗ "Çok doğru söylemiş" → değer yok, %40 avantaj boşa gider
+  - ✓ "3 yıldır bunu yapıyorum. Sonuç: gelirimi 4x'ledim. İşte nasıl..." → kişisel + veri
+  - ✗ "Kesinlikle katılıyorum!" → onaylama, yeni bilgi yok
+  - ✓ "Bu tam olarak X firmasının çöküş sebebi. Ben oradayken şunu gördüm..." → içeriden bakış
+
+### İlk 1 Saat Kuralı
+- X algoritması tweet'i ilk 60 dakikada test eder — bu süredeki engagement oranı geri kalan ömrü belirler
+- Tweet atıp uygulamayı kapatmak algoritmaya "bu içerik önemli değil" mesajı verir
+- Zorunlu adımlar:
+  1. En aktif saatte (yayın penceresi) at
+  2. İlk yorumu kendin at (Self Reply Taktiği ile birleştir)
+  3. 15 dk platformda kal
+  4. Gelen yorumlara 5 dk içinde yanıt ver
+  5. 30. dakikada hikayeye ekle (varsa)
+  6. 1. saat sonunda analiz et
+
+### Etkileşim Çiftliği (Pre-Tweet Aktivasyonu)
+- Her tweet atmadan 20 dakika önce nişindeki 5-10 hesapla etkileşime geç
+- Algoritma "sadece kendi içeriğini paylaşan" hesapları cezalandırıyor — önce etkileşim = topluluk üyesi bonusu
+- Etkileşim türleri: yorum yap, beğen, kaydet, paylaş
+- Sonra tweet at — bu sıra algoritma skoru için kritik
+
+### Makale ve Link Paylaşımı Kuralı
+- **2025 X algoritması: kaliteli makale paylaşımları %30 daha fazla reach alıyor**
+- X artık dış linkleri cezalandırmıyor — "Read more" tıklamaları algoritma için güçlü sinyal
+- **Zorunlu format:** Link tek başına YASAK — en az 1-2 key insight + kendi yorumun olmadan paylaşma
+- Kendi deneyimini bağla: "Ben de bunu şöyle uyguladım..."
+- Okuyucuyu hazırla: "Bu makale şunu söylüyor, ben buna katılmıyorum çünkü..."
+- Güncel konular ve newsletter paylaşımları da sayılır
+- %30 reach avantajını maksimize et: makaleyi kendi nişine (agentic AI, MCP, vibe coding) köprüle
+
+### Kısa Video Kuralları
+- Video eklenecekse **maksimum 60 saniye** — izleyicilerin %65'i 30 sn içinde bırakıyor
+- İlk 3 saniye hayati: değer vaadini hemen ver — "bu videoda şunu öğreneceksin"
+- İzleyicilerin %85'i sessiz izliyor — **altyazı zorunlu**
+- Format: dikey veya kare (mobil optimizasyonu)
+- Yüze konuşmak güven inşa eder; screen recording eğitim içeriği için ideal
+- Kısa video = yüksek tamamlanma oranı = algoritma ödülü
+
 ---
 
 ## Çıktı Formatı
@@ -404,6 +531,14 @@ Her içerik üretilmeden önce Creator şu checklist'i geçer. Tüm maddelere "g
 - [ ] Okuyucu bu tweetin sonunda ne biliyor, ne yapabiliyor ya da ne hissediyor?
 - [ ] İçeriğin bookmark / DM share değeri var mı?
 
+**Format Testi**
+- [ ] Tek tweet ise 400-600 karakter aralığında mı? (Spark format)
+- [ ] Self reply planlandı mı? (tweet'ten 2-3 dk sonra)
+- [ ] Eğer quote tweet ise ilk 2 saatte mi ve gerçek değer mi ekliyor? (%40 visibility avantajı kullanılıyor mu?)
+- [ ] Quote tweet ise Spark Format ile birleşti mi? (kendi yorumun 400-600 karakter = maksimum etki)
+- [ ] Makale/link paylaşımıysa en az 1-2 key insight + kişisel yorum var mı? (%30 reach avantajı için zorunlu)
+- [ ] Video kullanıldıysa max 60 sn ve altyazı var mı?
+
 ---
 
 ## Anti-Pattern Listesi
@@ -430,7 +565,7 @@ Aşağıdakileri asla üretme. Bunlar hem X algoritması skoru düşürür hem d
 ### Algoritma Anti-Pattern'leri
 - **Günde 3'ten fazla orijinal tweet önerisi** — author diversity cezası
 - **Aynı konuyu aynı gün tekrarlama** — thread + ayrı tweet = ceza
-- **Link-only tweet** — tek satır + link; dwell time sıfır
+- **Link-only tweet** — tek satır + link; yorum eklenmeden paylaşma; dwell time sıfır (X artık linkleri cezalandırmıyor ama yorum zorunlu)
 - **Sabahın körü 06:00 öncesi yayın** — kitle aktif değil, engagement penceresi kaçar
 - **Thread'i tek seferde tüm konuları doldurma** — fazla bilgi = okuyucu kaçar
 - **CTA'yı ilk tweete koyma** — içerik teslim edilmeden CTA = spam
@@ -579,6 +714,37 @@ AUTHOR DIVERSITY KURALLARI:
 - Günde max 3 orijinal tweet öner — istisnasız
 - Aynı konuyu aynı gün hem thread hem tweet: yasak
 - Öneri Modunda plan buna göre yapılır
+
+SPARK FORMAT KURALI (2026 META):
+- Tek tweet'lerde hedef uzunluk 400-600 karakter — bu aralık X'te en yüksek dwell time üretiyor
+- Yapı: Hook + Build + Punch — kanca ile aç, argümanı inşa et, güçlü kapanış yap
+- Quote + Spark combo özellikle etkili; görsel eklenince daha da güçlenir
+
+SELF REPLY TAKTİĞİ:
+- Tweet'ten 2-3 dk sonra kendi tweet'ine reply at — engagement 3x artar
+- Her reply farklı değer taşımalı (ek bilgi → kaynak → CTA sıralamasıyla)
+- Max 3-4 reply; son reply'da her zaman CTA olmalı
+
+QUOTE TWEET STRATEJİSİ:
+- Trend tweet'lere ilk 2 saatte quote at
+- Sadece onaylama değil, kendi deneyimini veya verini ekle — algoritma bunu "orijinal düşünce" sayar
+- Quote'u kendi nişine çek; görsel ekle, etkileşim 2x artar
+
+İLK 1 SAAT KURALI:
+- Tweet sonrası 15 dk platformda kal; 5 dk içinde gelen yorumlara yanıt ver
+- İlk yorumu kendin at (self reply); 30. dakikada hikayeye ekle
+
+ETKİLEŞİM ÇİFTLİĞİ:
+- Her tweet'ten 20 dk önce nişindeki 5-10 hesaba yorum yap, beğen, kaydet
+- Sonra tweet at — bu sıra algoritma skoru için kritik
+
+MAKALE/LİNK PAYLAŞIMI:
+- X artık linkleri cezalandırmıyor; kendi yorumunla paylaşılan makale %30 daha fazla reach alıyor
+- 1-2 key insight + kendi deneyimini ekle; okumadan paylaşma
+
+VİDEO KURALLARI:
+- Video kullanılacaksa max 60 sn; ilk 3 sn'de değer vaadi ver
+- Altyazı zorunlu (%85 sessiz izliyor); dikey/kare format; screen recording eğitim için ideal
 
 ━━━ ÇIKTI FORMATI — HER ÖNERDE ZORUNLU 7 BİLEŞEN ━━━
 

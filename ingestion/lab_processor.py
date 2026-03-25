@@ -126,11 +126,18 @@ def classify_batch_openai(tweets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         response_format={"type": "json_object"},
     )
     raw = resp.choices[0].message.content
-    # Model bazen {"results": [...]} formatında döner
+    # Model bazen {"results": [...]} veya tek label dict döndürür
     parsed = json.loads(raw)
     if isinstance(parsed, list):
         return parsed
-    return parsed.get("results", list(parsed.values())[0] if parsed else [])
+    # Tek label dict: {"tweet_id": ..., "kanca_tipi": ...}
+    if "tweet_id" in parsed:
+        return [parsed]
+    # {"results": [...]} veya {"labels": [...]} gibi wrapper
+    for v in parsed.values():
+        if isinstance(v, list):
+            return v
+    return []
 
 
 def classify_batch_anthropic(tweets: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "description": "TwitterYoldas Tweet Queue — Telegram bot veya Creator skill'den onaylanan tweetler buraya yazar. /twitter:post komutuyla Xquik üzerinden X'e atılır.",
+  "tweets": []
+}

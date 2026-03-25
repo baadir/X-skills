@@ -56,6 +56,9 @@ class TweetRecord(BaseModel):
     query_used:             Optional[str] = None
     collection_session_id:  Optional[str] = None
 
+    tweet_url:              Optional[str] = None
+    virality_punch:         float = 0.0
+
     @field_validator("tweet_id")
     @classmethod
     def tweet_id_nonempty(cls, v: str) -> str:
@@ -78,6 +81,15 @@ class TweetRecord(BaseModel):
         # reply_to_like_ratio
         if self.reply_to_like_ratio is None and self.likes and self.likes > 0:
             self.reply_to_like_ratio = round(self.replies / self.likes, 6)
+
+        # tweet_url
+        if not self.tweet_url and self.username and self.tweet_id:
+            self.tweet_url = f"https://x.com/{self.username}/status/{self.tweet_id}"
+
+        # virality_punch: takipçi başına like oranı (%)
+        if self.virality_punch == 0.0 and self.likes > 0:
+            followers = max(self.author_followers or 0, 100)
+            self.virality_punch = round((self.likes / followers) * 100, 4)
 
         # priority_score
         if self.priority_score is None and self.impressions and self.impressions > 0:

@@ -285,9 +285,11 @@ def upsert_tweets(
             tweet.query_used,
             thread_role,
             viral_level,
-            emb,            # vector(384)
+            emb,            # vector(1536)
             False,          # lab_processed
             True,           # embedding_generated
+            tweet.tweet_url,
+            tweet.virality_punch,
         ))
 
     if not rows:
@@ -307,7 +309,8 @@ def upsert_tweets(
             hashtags, hashtag_count, mention_count,
             source, query_used,
             thread_role, viral_level,
-            embedding, lab_processed, embedding_generated
+            embedding, lab_processed, embedding_generated,
+            tweet_url, virality_punch
         ) VALUES %s
         ON CONFLICT (tweet_id) DO UPDATE SET
             likes                = EXCLUDED.likes,
@@ -322,6 +325,8 @@ def upsert_tweets(
             priority_score       = EXCLUDED.priority_score,
             viral_level          = EXCLUDED.viral_level,
             thread_complete      = EXCLUDED.thread_complete,
+            tweet_url            = COALESCE(EXCLUDED.tweet_url, tweets.tweet_url),
+            virality_punch       = EXCLUDED.virality_punch,
             updated_at           = NOW()
         RETURNING (xmax = 0) AS is_insert
     """
